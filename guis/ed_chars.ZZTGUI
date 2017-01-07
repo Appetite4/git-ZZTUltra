@@ -1,0 +1,27 @@
+{"GuiHeight":10,
+"KeyInput":{
+" ":"ED_CHARSEL",
+"27":"ED_CHARCANCEL",
+"13":"ED_CHARSEL"},
+"Text":"
+ÚÄÄÄ Enter:  Select Character ÄÄÄ¿
+³                                ³
+³ !\"#$%&'()*+,-./0123456789:;<=>?³
+³@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_³
+³`abcdefghijklmnopqrstuvwxyz{|}~³
+³\u0080\u0081\u0082\u0083\u0084\u0085\u0086\u0087\u0088\u0089\u008A\u008B\u008C\u008D\u008E\u008F\u0090\u0091\u0092\u0093\u0094\u0095\u0096\u0097\u0098\u0099\u009A\u009B\u009C\u009D\u009E\u009F³
+³ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿³
+³ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞß³
+³àáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ ³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+",
+"GuiLocX":13,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":7,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":34,
+"Color":[15,34,15,34,15,34,15,34,15,34,15,34,15,34,15,34,15,34,15,34],
+"Viewport":[26,1,60,25]}

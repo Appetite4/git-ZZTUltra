@@ -1,0 +1,42 @@
+{"GuiHeight":20,
+"KeyInput":{
+"F":"ED_TYPEFLOOR",
+"Z":"ED_TYPESTONE",
+"50":"ED_TYPEWATERS",
+"52":"ED_TYPEWATERW",
+"54":"ED_TYPEWATERE",
+"56":"ED_TYPEWATERN",
+"27":"ED_CANCELTYPE",
+"W":"ED_TYPEWEB"},
+"Text":"
+                    
+     SZT Terrains   
+                    
+  F  Floor        \u00B0 
+  8  Water N      \u001E 
+  2  Water S      \u001F 
+  4  Water W      \u0011 
+  6  Water E      \u0010 
+  W  Web          \u00C5 
+  Z  Stone        Z 
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,1,96,3,31,14,30,1,31,1,31,1,64,3,31,14,25,1,31,1,31,1,96,3,31,14,25,1,31,1,31,1,64,3,31,14,25,1,31,1,31,1,96,3,31,14,25,1,31,1,31,1,64,3,31,14,15,1,31,1,31,1,96,3,31,14,11,1,31,1,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20],
+"Viewport":[1,1,60,25]}

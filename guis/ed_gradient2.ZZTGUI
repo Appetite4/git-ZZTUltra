@@ -1,0 +1,53 @@
+{"GuiHeight":25,
+"KeyInput":{
+"27":"ED_CANCELGRADIENT",
+"37":"ED_GRADPTLEFT",
+"38":"ED_GRADPTUP",
+"39":"ED_GRADPTRIGHT",
+"40":"ED_GRADPTDOWN",
+"9":"ED_GRADCHANGEPT",
+"107":"ED_GRADDITHERMORE",
+"13":"ED_GRADIENTDONE",
+"L":"ED_GRADLINEAR",
+"109":"ED_GRADDITHERLESS",
+"R":"ED_GRADRADIAL",
+"B":"ED_GRADBILINEAR",
+"187":"ED_GRADDITHERMORE",
+"189":"ED_GRADDITHERLESS"},
+"Text":"
+                    
+   Gradient Foci    
+                    
+ Select points for  
+ gradient focus:    
+                    
+  \u0018\u0019\u001a\u001b   Move Pt.   
+   Tab   Other Pt.  
+  Enter  Finalize   
+   Esc   Cancel     
+                    
+   +/-   Dither     
+                    
+ Gradient Type:     
+                    
+  L  Linear         
+  B  Bilinear       
+  R  Radial         
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,20,31,20,31,20,31,1,48,7,31,12,31,1,112,7,31,12,31,1,48,7,31,12,31,1,112,7,31,12,31,20,31,1,48,7,31,12,31,20,31,20,31,20,31,1,112,3,31,16,31,1,48,3,31,16,31,1,112,3,31,16,31,20,31,20,31,20,31,20,31,20,31,20,31,20],
+"Viewport":[1,1,60,25]}

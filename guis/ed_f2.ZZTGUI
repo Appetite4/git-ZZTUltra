@@ -1,0 +1,48 @@
+{"GuiHeight":20,
+"KeyInput":{
+"H":"ED_TYPEHEAD",
+"R":"ED_TYPERUFFIAN",
+"A":"ED_TYPESTAR",
+"B":"ED_TYPEBEAR",
+"Y":"ED_TYPESHARK",
+"G":"ED_TYPESPINNINGGUN",
+"L":"ED_TYPELION",
+"V":"ED_TYPESLIME",
+"S":"ED_TYPESEGMENT",
+"O":"ED_TYPEOBJECT",
+"T":"ED_TYPETIGER",
+"P":"ED_TYPEPUSHER",
+"27":"ED_CANCELTYPE",
+"U":"ED_TYPEBULLET"},
+"Text":"
+                    
+     Creatures      
+                    
+  B  Bear         \u0099 
+  R  Ruffian      \u0005 
+  O  Object       \u0001 
+  V  Slime        * 
+  Y  Shark        ^ 
+  G  Spinning gun \u0018 
+  P  Pusher       \u0010 
+  L  Lion         \u00EA 
+  T  Tiger        \u00E3 
+  U  Bullet       \u00F8 
+  A  Star         / 
+                    
+     Centipedes     
+                    
+  H  Head         \u00E9 
+  S  Segment      O 
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,1,96,3,31,14,6,1,31,1,31,1,64,3,31,14,13,1,31,1,31,1,96,3,31,14,14,1,31,1,31,1,64,3,31,14,10,1,31,1,31,1,96,3,31,14,7,1,31,1,31,1,64,3,31,14,15,1,31,1,31,1,96,3,31,14,14,1,31,1,31,1,64,3,31,14,12,1,31,1,31,1,96,3,31,14,11,1,31,1,31,1,64,3,31,14,15,1,31,1,31,1,96,3,31,14,13,1,31,1,31,20,31,5,27,10,31,5,31,20,31,1,96,3,31,14,12,1,31,1,31,1,64,3,31,14,12,1,31,1,31,20],
+"Viewport":[1,1,60,25]}

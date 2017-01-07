@@ -1,0 +1,39 @@
+{"GuiHeight":20,
+"KeyInput":{
+"D":"ED_TYPEBDRAGONPUP",
+"P":"ED_TYPEPAIRER",
+"27":"ED_CANCELTYPE",
+"S":"ED_TYPESPIDER",
+"R":"ED_TYPEROTON"},
+"Text":"
+                    
+     Uglies         
+                    
+  R  Roton        \u0094 
+  D  Dragon Pup   \u0095 
+  P  Pairer       \u00E5 
+  S  Spider       \u000F 
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,1,96,3,31,14,29,1,31,1,31,1,64,3,31,14,20,1,31,1,31,1,96,3,31,14,25,1,31,1,31,1,64,3,31,14,30,1,31,1,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20],
+"Viewport":[1,1,60,25]}

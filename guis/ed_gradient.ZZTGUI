@@ -1,0 +1,51 @@
+{"GuiHeight":25,
+"KeyInput":{
+" ":"GRADIENT2",
+"Shift+37":"ED_GRADSELLEFT",
+"Shift+38":"ED_GRADSELUP",
+"Shift+40":"ED_GRADSELDOWN",
+"37":"ED_GRADLEFT",
+"38":"ED_GRADUP",
+"39":"ED_GRADRIGHT",
+"F":"ED_GRADSELFILL",
+"40":"ED_GRADDOWN",
+"27":"ED_CANCELGRADIENT",
+"Shift+39":"ED_GRADSELRIGHT",
+"13":"ED_GRADIENT2"},
+"Text":"
+                    
+ Gradient Fill Tool 
+                    
+ Select rectangle   
+ containing area... 
+                    
+  Shift + \u0018\u0019\u001a\u001b      
+                    
+ or select using... 
+                    
+  F   Flood Select  
+                    
+                    
+  Enter  Choose     
+   Esc   Cancel     
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,31,1,27,18,31,1,31,20,31,20,31,20,31,20,31,1,112,14,31,5,31,20,31,20,31,20,31,1,48,3,31,16,31,20,31,20,31,1,112,7,31,12,31,1,48,7,31,12,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20],
+"Viewport":[1,1,60,25]}

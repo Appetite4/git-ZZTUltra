@@ -1,0 +1,64 @@
+<NotepadPlus>
+    <UserLang name="ZZT-OOP Ultra" ext="" udlVersion="2.1">
+        <Settings>
+            <Global caseIgnored="yes" allowFoldOfComments="no" foldCompact="no" forcePureLC="1" decimalSeparator="0" />
+            <Prefix Keywords1="no" Keywords2="no" Keywords3="no" Keywords4="no" Keywords5="no" Keywords6="no" Keywords7="no" Keywords8="no" />
+        </Settings>
+        <KeywordLists>
+            <Keywords name="Comments">00&apos; 01 02 03 04</Keywords>
+            <Keywords name="Numbers, prefix1"></Keywords>
+            <Keywords name="Numbers, prefix2"></Keywords>
+            <Keywords name="Numbers, extras1"></Keywords>
+            <Keywords name="Numbers, extras2"></Keywords>
+            <Keywords name="Numbers, suffix1"></Keywords>
+            <Keywords name="Numbers, suffix2"></Keywords>
+            <Keywords name="Numbers, range"></Keywords>
+            <Keywords name="Operators1">- ! &quot; $ % &amp; ( ) * , . / : ; ? [ ] ^ | ~ + &lt; = &gt;</Keywords>
+            <Keywords name="Operators2"></Keywords>
+            <Keywords name="Folders in code1, open"></Keywords>
+            <Keywords name="Folders in code1, middle"></Keywords>
+            <Keywords name="Folders in code1, close"></Keywords>
+            <Keywords name="Folders in code2, open"></Keywords>
+            <Keywords name="Folders in code2, middle"></Keywords>
+            <Keywords name="Folders in code2, close"></Keywords>
+            <Keywords name="Folders in comment, open"></Keywords>
+            <Keywords name="Folders in comment, middle"></Keywords>
+            <Keywords name="Folders in comment, close"></Keywords>
+            <Keywords name="Keywords1">#GO #TRY #WALK #DIE #ENDGAME #END #SEND #RESTART #BIND #BECOME #CHANGE #PUT #CHAR #CYCLE #CLEAR #SET #GIVE #TAKE #IF #LOCK #UNLOCK #ZAP #RESTORE #SHOOT #THROWSTAR #PLAY #IDLE&#x000D;&#x000A;#PAUSE&#x000D;&#x000A;#UNPAUSE&#x000D;&#x000A;#EXTRATURNS&#x000D;&#x000A;#DONEDISPATCH&#x000D;&#x000A;#DISPATCH&#x000D;&#x000A;#SENDTO&#x000D;&#x000A;#DISPATCHTO&#x000D;&#x000A;#SWITCHTYPE&#x000D;&#x000A;#SWITCHVALUE&#x000D;&#x000A;#SETREGION&#x000D;&#x000A;#CLEARREGION&#x000D;&#x000A;#CHAR4DIR&#x000D;&#x000A;#COLOR&#x000D;&#x000A;#COLORALL&#x000D;&#x000A;#SETPOS&#x000D;&#x000A;#FORCEGO&#x000D;&#x000A;#PUSHATPOS&#x000D;&#x000A;#DYNTEXT&#x000D;&#x000A;#DYNLINK&#x000D;&#x000A;#DYNTEXTVAR&#x000D;&#x000A;#SETPLAYER&#x000D;&#x000A;#SETPROPERTY&#x000D;&#x000A;#GETPROPERTY&#x000D;&#x000A;#PLAYERINPUT&#x000D;&#x000A;#TYPEAT&#x000D;&#x000A;#COLORAT&#x000D;&#x000A;#OBJAT&#x000D;&#x000A;#LITAT&#x000D;&#x000A;#RANDOM&#x000D;&#x000A;#DIR2UVECT8&#x000D;&#x000A;#OFFSETBYDIR&#x000D;&#x000A;#SUBSTR&#x000D;&#x000A;#INT&#x000D;&#x000A;#SPAWN&#x000D;&#x000A;#CHANGEREGION&#x000D;&#x000A;#CLONE&#x000D;&#x000A;#FOREACH&#x000D;&#x000A;#FORMASK&#x000D;&#x000A;#FORNEXT&#x000D;&#x000A;#UPDATEVIEWPORT&#x000D;&#x000A;#ERASEVIEWPORT&#x000D;&#x000A;#DISSOLVEVIEWPORT&#x000D;&#x000A;#SCROLLTOVISUALS&#x000D;&#x000A;#CAMERAFOCUS&#x000D;&#x000A;#LIGHTEN&#x000D;&#x000A;#DARKEN&#x000D;&#x000A;#UPDATELIT&#x000D;&#x000A;#SUSPENDDISPLAY&#x000D;&#x000A;#USEGUI&#x000D;&#x000A;#SETGUILABEL&#x000D;&#x000A;#SELECTPEN&#x000D;&#x000A;#DRAWPEN&#x000D;&#x000A;#DRAWBAR&#x000D;&#x000A;#CONFMESSAGE&#x000D;&#x000A;#TEXTENTRY&#x000D;&#x000A;#SAVEBOARD&#x000D;&#x000A;#CHANGEBOARD&#x000D;&#x000A;#SAVEWORLD&#x000D;&#x000A;#LOADWORLD&#x000D;&#x000A;#RESTOREGAME&#x000D;&#x000A;#PLAYSOUND&#x000D;&#x000A;#GETSOUND&#x000D;&#x000A;#STOPSOUND&#x000D;&#x000A;#PUSHARRAY&#x000D;&#x000A;#POPARRAY&#x000D;&#x000A;#SETARRAY</Keywords>
+            <Keywords name="Keywords2">ANY ALLIGNED CONTACT BLOCKED ENERGIZED NOT THEN ALIGNED ANYTO ANYIN SELFIN TYPEIS BLOCKEDAT CANPUSH TEST VALID</Keywords>
+            <Keywords name="Keywords3">E S W N I EAST SOUTH WEST NORTH IDLE SEEK FLOW RNDNS RNDNE RND CW CCW RNDP OPP RNDSQ TOWARDS MAJOR MINOR</Keywords>
+            <Keywords name="Keywords4">EMPTY BOARDEDGE MESSENGER MONITOR PLAYER AMMO TORCH GEM KEY DOOR SCROLL PASSAGE DUPLICATOR BOMB ENERGIZER STAR CLOCKWISE COUNTER BULLET WATER LAVA FOREST SOLID NORMAL BREAKABLE BOULDER SLIDERNS SLIDEREW FAKE INVISIBLE BLINKWALL TRANSPORTER LINE RICOCHET BEAR RUFFIAN OBJECT SLIME SHARK SPINNINGGUN PUSHER LION TIGER HEAD SEGMENT FLOOR WATERN WATERS WATERW WATERE ROTON DRAGONPUP PAIRER SPIDER WEB STONE _BEAMVERT _BEAMHORIZ _TEXTBLUE _TEXTGREEN _TEXTCYAN _TEXTRED _TEXTPURPLE _TEXTBROWN _TEXTWHITE</Keywords>
+            <Keywords name="Keywords5">SELF ALL OTHERS</Keywords>
+            <Keywords name="Keywords6">BLUE GREEN CYAN RED PURPLE YELLOW WHITE BLACK DARKBLUE DARKGREEN DARKCYAN DARKRED DARKPURPLE BROWN GREY DARKGREY</Keywords>
+            <Keywords name="Keywords7">TOUCH SHOT BOMBED THUD ENERGIZE HINT</Keywords>
+            <Keywords name="Keywords8">TYPE X Y STEPX STEPY CYCLE P1 P2 P3 FOLLOWER LEADER UNDERID UNDERCOLOR CHAR COLOR COLORALL INTELLIGENCE SENSITIVITY PHASE PERIOD RESTINGTIME DEVIANCE RATE DESTINATION</Keywords>
+            <Keywords name="Delimiters"></Keywords>
+        </KeywordLists>
+        <Styles>
+            <WordsStyle name="DEFAULT" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="COMMENTS" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="LINE COMMENTS" fgColor="008000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="NUMBERS" fgColor="808080" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS1" fgColor="000000" bgColor="FFFF80" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS2" fgColor="FF8040" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS3" fgColor="008080" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS4" fgColor="FF0000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS5" fgColor="0080FF" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS6" fgColor="0000FF" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS7" fgColor="8000FF" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="KEYWORDS8" fgColor="800080" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="OPERATORS" fgColor="FF00FF" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE1" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="FOLDER IN CODE2" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="FOLDER IN COMMENT" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS1" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS2" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS3" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS4" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS5" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS6" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS7" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+            <WordsStyle name="DELIMITERS8" fgColor="000000" bgColor="FFFFFF" fontStyle="0" nesting="0" />
+        </Styles>
+    </UserLang>
+</NotepadPlus>

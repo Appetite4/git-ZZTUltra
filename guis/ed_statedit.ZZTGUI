@@ -1,0 +1,39 @@
+{
+"GuiWidth":20,
+"KeyInput":{},
+"Text":"
+                    
+ Edit Stat Element  
+                    
+   \u001b/\u001a   Adjust     
+  Enter  Edit       
+                    
+   Del   Remove     
+                    
+   Esc   Done       
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+",
+"GuiLocX":61,
+"OverallSizeX":80,
+"Color":[28,20,27,20,31,20,31,1,112,7,31,12,31,1,48,7,31,12,31,20,31,1,112,7,31,12,31,20,31,1,48,7,31,12,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20,31,20],
+"GuiLocY":1,
+"OverallSizeY":25,
+"Label":{
+"FILEMESSAGE":[1,11,20,31],
+"FILEENTRY":[3,12,12,15],
+"CONFMESSAGE":[1,11,20,31],
+"TOAST1":[-59,25,60,15]
+},
+"GuiHeight":20,
+"Viewport":[1,1,60,25],
+"Use40Column":0}

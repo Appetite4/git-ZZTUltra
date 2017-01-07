@@ -1,0 +1,47 @@
+{"GuiHeight":20,
+"KeyInput":{
+"Z":"ED_TYPEPLAYER",
+"A":"ED_TYPEAMMO",
+"P":"ED_TYPEPASSAGE",
+"K":"ED_TYPEKEY",
+"G":"ED_TYPEGEM",
+"D":"ED_TYPEDOOR",
+"49":"ED_TYPECLOCKWISE",
+"50":"ED_TYPECOUNTER",
+"S":"ED_TYPESCROLL",
+"U":"ED_TYPEDUPLICATOR",
+"T":"ED_TYPETORCH",
+"27":"ED_CANCELTYPE",
+"E":"ED_TYPEENERGIZER"},
+"Text":"
+                    
+     Items          
+                    
+  Z  Player       \u0002 
+  A  Ammo         \u0084 
+  T  Torch        \u009D 
+  G  Gem          \u0004 
+  K  Key          \f 
+  D  Door         \t 
+  S  Scroll       \u00E8 
+  P  Passage      \u00F0 
+  U  Duplicator   \u00FA 
+  B  Bomb         \u000B 
+  E  Energizer    \u007F 
+                    
+     Conveyors      
+                    
+  1  Clockwise    / 
+  2  Counter      \\ 
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,1,96,3,31,16,31,1,64,3,31,14,3,1,31,1,31,1,96,3,31,14,6,1,31,1,31,1,64,3,31,14,12,1,31,1,31,1,96,3,31,14,10,1,31,1,31,1,64,3,31,14,122,1,31,1,31,1,96,3,31,14,15,1,31,1,31,1,64,3,31,14,95,1,31,1,31,1,96,3,31,14,15,1,31,1,31,1,64,3,31,14,14,1,31,1,31,1,96,3,31,14,5,1,31,1,31,20,31,5,27,9,31,6,31,20,31,1,96,3,31,14,11,1,31,1,31,1,64,3,31,14,11,1,31,1,31,20],
+"Viewport":[1,1,60,25]}

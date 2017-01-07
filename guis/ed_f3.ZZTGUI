@@ -1,0 +1,58 @@
+{"GuiHeight":25,
+"KeyInput":{
+"F":"ED_TYPEFOREST",
+"R":"ED_TYPERICOCHET",
+"W":"ED_TYPEWATER",
+"E":"ED_TYPEBOARDEDGE",
+"H":"ED_TYPE_BEAMHORIZ",
+"B":"ED_TYPEBREAKABLE",
+"T":"ED_TYPETRANSPORTER",
+"D":"ED_TYPEDEADSMILEY",
+"A":"ED_TYPEFAKE",
+"M":"ED_TYPEMONITOR",
+"L":"ED_TYPEBLINKWALL",
+"49":"ED_TYPESLIDERNS",
+"50":"ED_TYPESLIDEREW",
+"S":"ED_TYPESOLID",
+"I":"ED_TYPEINVISIBLE",
+"N":"ED_TYPENORMAL",
+"27":"ED_CANCELTYPE",
+"O":"ED_TYPEBOULDER",
+"V":"ED_TYPE_BEAMVERT"},
+"Text":"
+                    
+     Terrains       
+                    
+  W  Water        \u00B0 
+  F  Forest       \u00B0 
+  S  Solid        \u00DB 
+  N  Normal       \u00B2 
+  B  Breakable    \u00B1 
+  O  Boulder      \u00FE 
+  1  Slider (NS)  \u0012 
+  2  Slider (EW)  \u001d 
+  A  Fake         \u00B2 
+  I  Invisible    \u00B0 
+  L  Blink wall   \u00CE 
+  T  Transporter  < 
+  R  Ricochet     * 
+                    
+     Special        
+                    
+  E  Board edge   E 
+  M  Monitor      M 
+  H  Beam horiz   \u00CD 
+  V  Beam vert    \u00BA 
+  D  Dead smiley  \u0002 
+                    
+",
+"GuiLocX":61,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":20,
+"Color":[28,20,27,20,31,20,31,1,96,3,31,16,31,1,64,3,31,14,32,1,31,1,31,1,96,3,31,14,14,1,31,1,31,1,64,3,31,14,14,1,31,1,31,1,96,3,31,14,14,1,31,1,31,1,64,3,31,14,11,1,31,1,31,1,96,3,31,14,11,1,31,1,31,1,64,3,31,14,11,1,31,1,31,1,96,3,31,14,13,1,31,1,31,1,64,3,31,14,12,1,31,1,31,1,96,3,31,14,15,1,31,1,31,1,64,3,31,14,11,1,31,1,31,1,96,3,27,1,31,8,27,4,31,1,10,1,31,1,31,20,27,20,27,20,27,1,64,3,31,14,15,1,31,1,31,1,96,3,31,14,15,1,31,1,31,1,64,3,27,1,31,10,27,3,15,1,27,1,31,1,96,3,31,14,15,1,31,1,27,1,64,3,27,1,31,11,27,2,15,1,31,1,31,20],
+"Viewport":[1,1,60,25]}

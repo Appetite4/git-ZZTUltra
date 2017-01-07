@@ -1,0 +1,46 @@
+{"GuiHeight":25,
+"KeyInput":{
+" ":"ED_TYPEALLSEL",
+"33":"ED_TYPEALLPREV",
+"34":"ED_TYPEALLNEXT",
+"E":"ED_TYPEEDITOR",
+"N":"ED_TYPENEW",
+"27":"ED_CANCELALLTYPE",
+"13":"ED_TYPEALLSEL"},
+"Text":"
+ Select Type                             \u00B3  Type Info                           
+\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C2\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C5\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4
+                    \u00B3                    \u00B3 NUMBER:                              
+                    \u00B3                    \u00B3 CYCLE:                               
+                    \u00B3                    \u00B3 STEPX:                               
+                    \u00B3                    \u00B3 STEPY:                               
+                    \u00B3                    \u00B3 CHAR:                                
+                    \u00B3                    \u00B3 COLOR:                               
+                    \u00B3                    \u00B3 NOSTAT:                              
+                    \u00B3                    \u00B3 BLOCKOBJECT:                         
+                    \u00B3                    \u00B3 BLOCKPLAYER:                         
+                    \u00B3                    \u00B3 ALWAYSLIT:                           
+                    \u00B3                    \u00B3 DOMINANTCOLOR:                       
+                    \u00B3                    \u00B3 FULLCOLOR:                           
+                    \u00B3                    \u00B3 TEXTDRAW:                            
+                    \u00B3                    \u00B3 CUSTOMDRAW:                          
+                    \u00B3                    \u00B3 HASOWNCHAR:                          
+                    \u00B3                    \u00B3 HASOWNCODE:                          
+                    \u00B3                    \u00B3 CUSTOMSTART:                         
+                    \u00B3                    \u00B3 PUSHABLE:                            
+                    \u00B3                    \u00B3 SQUASHABLE:                          
+                    \u00B3                    \u00B3 EXTRAS:                              
+                    \u00B3                    \u00B3                                      
+\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C1\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00C4\u00B4  E  Edit Type                        
+  PgUp/PgDn   More Types                 \u00B3  N  New  Type                        
+",
+"GuiLocX":1,
+"OverallSizeY":25,
+"OverallSizeX":80,
+"GuiLocY":1,
+"Use40Column":0,
+"Label":{
+"TOAST1":[-59,25,60,15]},
+"GuiWidth":80,
+"Color":[27,60,31,20,27,80,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,31,20,27,1,31,20,27,1,31,38,27,43,48,3,30,34,31,1,112,11,30,12,31,17,27,1,31,1,112,3,31,1,30,33],
+"Viewport":[26,1,60,25]}

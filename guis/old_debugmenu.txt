@@ -1,0 +1,94 @@
+"DEBUGMENU":{
+
+"Use40Column":0,
+"OverallSizeX":80,
+"OverallSizeY":25,
+"GuiLocX":61,
+"GuiLocY":1,
+"GuiWidth":20,
+"GuiHeight":25,
+"Viewport":[1,1,60,25],
+"Text":"
+     - - - - -      
+ZZT ULTRA MAIN MENU 
+     - - - - -      
+                    
+  ---   SITE   ---  
+  L  Load World     
+                    
+                    
+  --- EXTERNAL ---  
+  Z  Load ZZT       
+  S  Load Super ZZT 
+  W  Load WAD       
+  I  Load ZIP       
+                    
+                    
+  ---  TOOLS   ---  
+  E  World Editor   
+  G  Edit GUI       
+  O  Options        
+                    
+  A  About ZZTUltra 
+                    
+                    
+                    
+                    
+",
+"Color":[
+31,20,
+112,20,
+31,20,
+31,20,
+26,20,
+31,1, 48,3, 31,16,
+31,20,
+31,20,
+26,20,
+31,1, 112,3, 31,16,
+31,1, 48,3, 31,16,
+31,1, 112,3, 31,16,
+31,1, 48,3, 31,16,
+31,20,
+31,20,
+26,20,
+31,1, 112,3, 31,16,
+31,1, 48,3, 31,16,
+31,1, 112,3, 31,16,
+31,20,
+31,1, 112,3, 31,16,
+31,20,
+31,20,
+31,20,
+31,20
+],
+"KeyInput":{
+"L":"EVENT_LOADDEP",
+"Z":"EVENT_LOADZZT",
+"S":"EVENT_LOADSZT",
+"W":"EVENT_LOADWAD",
+"I":"EVENT_LOADZIP",
+"E":"EVENT_EDITOR",
+"G":"EVENT_EDITGUI",
+"O":"EVENT_OPTIONS",
+"A":"EVENT_ABOUTZZTULTRA"
+},
+"MouseInput":{
+"EVENT_LOADDEP":[1,6,20,1],
+"EVENT_LOADZZT":[1,10,20,1],
+"EVENT_LOADSZT":[1,11,20,1],
+"EVENT_LOADWAD":[1,12,20,1],
+"EVENT_LOADZIP":[1,13,20,1],
+"EVENT_EDITOR":[1,17,20,1],
+"EVENT_EDITGUI":[1,18,20,1],
+"EVENT_OPTIONS":[1,19,20,1],
+"EVENT_ABOUTZZTULTRA":[1,21,20,1]
+},
+"Label":{
+"FILEMESSAGE":[1,4,20,31],
+"FILEENTRY":[3,6,12,15],
+"CONFMESSAGE":[1,6,20,31],
+"TOAST1":[-59,25,60,15]
+}
+
+},
