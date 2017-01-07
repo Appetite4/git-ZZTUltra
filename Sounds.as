@@ -360,6 +360,16 @@ public static function getChannelPlaying(curVoice:int):int {
 	return 0;
 }
 
+public static function isAnyChannelPlaying():Boolean {
+	for (var i:int = 0; i < NUM_CHANNELS; i++)
+	{
+		if (getChannelPlaying(i) != 0)
+			return true;
+	}
+
+	return false;
+}
+
 public static function stopChannel(curVoice:int):Boolean {
 	if (channels[0] != null && curVoice >= 0 && curVoice < NUM_CHANNELS)
 	{
@@ -370,6 +380,13 @@ public static function stopChannel(curVoice:int):Boolean {
 	}
 
 	return false;
+}
+
+public static function stopAllChannels():Boolean {
+	for (var i:int = 0; i <= Sounds.NUM_CHANNELS; i++)
+		Sounds.stopChannel(i);
+
+	return true;
 }
 
 public static function playVoice():void {
@@ -463,167 +480,6 @@ public static function setMasterVolume(idx:int, channelStart:int=0, channelEnd:i
 public static function testPlay():void {
 	// "Standard" echo effect
 	//distributePlayNotes("K40:0.3:");
-
-	// "Monster Zoo" opening tune
-	/*distributePlayNotes("V45WXX");
-	distributePlayNotes("IEGB+ED#F#-BAGB+EGF#AD#-");
-	distributePlayNotes("I+F#EBSAGF#EID#F#-BAGBSA");
-	distributePlayNotes("SGF#EID#F#Q-BI+EGB+ECE-A");
-	distributePlayNotes("IGF#AD+C-B+D-GFE+ESDC-BA");
-	distributePlayNotes("IB+DG-GA+ESD-B+C-AB+D-F#");
-	distributePlayNotes("SAGBA+C-B+DIG-A+F#GD-QG");
-
-	// "Monster Zoo" Hall of Music #2
-	distributePlayNotes("V40ICEGAB!AGECEGAB!AGE");
-	distributePlayNotes("IFA+CDE!DC-AFA+CDE!DC-A");
-	distributePlayNotes("ICEGAB!AGECEGAB!AGE");
-	distributePlayNotes("IGB+DEFED-BFA+CDE!DC-A");
-	distributePlayNotes("ICEGAB!AGEHC");
-
-	// "Monster Zoo" Hall of Music #3
-	distributePlayNotes("V45SEGEGEGEGEG!EG!EG!EG!");
-	distributePlayNotes("SFA#FA#FA#FA#FA#FAFAFA");
-	distributePlayNotes("SEGBGEGBGEG!BG!EG!BG!FA#");
-	distributePlayNotes("S+D-A#FA#+D-A#FA+D-AFA");
-	distributePlayNotes("S+D-AEGEGEGEG");
-	distributePlayNotes("SCECECECECE!CE!CE!CE!");
-	distributePlayNotes("SDG!DG!DG!DG!DFDFDFQEDHC");
-
-	// "Monster Zoo" Hall of Music #4
-	distributePlayNotes("V45SCE!FGFE!QCX");
-	distributePlayNotes("S+C-B!GF#FE!QCX");
-	distributePlayNotes("SGGB!+CE!GFE!C-B!GB!+CQC-");*/
-
-	// "Monster Zoo" Hall of Music #5
-	/*distributePlayNotes("V40H+CQEGQ.-BS+CDQCXHAQG+C--");
-	distributePlayNotes("Q+GTGFGFSEFQEX-");
-	distributePlayNotes("IASB+CDEFGAGFEDC-BA");
-	distributePlayNotes("IGSAB+CDEFGFEDC-BAG");
-	distributePlayNotes("IFSGAB+CDEFEDC-BAGF");
-	distributePlayNotes("IESFGAB+CDEDC-BAGFE");
-	distributePlayNotes("IDSEFGAB+C#D-AB+CDEFG-");
-	distributePlayNotes("S+AB+C-BAGFEFGAGFEDC-");
-	distributePlayNotes("IB+GECDGECQDGH-G");
-
-	// Experimental "left hand" for Mozart's Sonata in C Major,
-	// which matches "right hand" used above
-	distributePlayNotes("Z01V40ICGEGCGEGDGFGCGEG");
-	distributePlayNotes("ICAFACGEGC!GFGCGEG");
-	distributePlayNotes("QFXXDCXXCCXXC!CXX");
-	distributePlayNotes("-QEAXXXQ.FIGQ.AIF#+");
-	distributePlayNotes("--SGB+DG-SGC+EG-SGB+DG-SGC+EG+");
-	distributePlayNotes("--QG+G-HG");*/
-
-	// Bucky O'Hare experimental track
-	/*distributePlayNotes("U150V35K40:0.3:SF#G#A+C#-F#G#A+C#-F#G#A+C#-F#G#A+C#-");
-	distributePlayNotes("F#G#ABF#G#ABF#G#ABF#G#AB");
-	distributePlayNotes("F#G#A+D-F#G#A+D-F#G#A+D-F#G#A+D-");
-	distributePlayNotes("F#G#A+C#-F#G#A+C#-F#G#A+C#-F#G#A+C#-");
-	distributePlayNotes("SF#G#A+C#-F#G#A+C#-F#G#A+C#-F#G#A+C#-");
-	distributePlayNotes("F#G#ABF#G#ABF#G#ABF#G#AB");
-	distributePlayNotes("F#G#A+D-F#G#A+D-F#G#A+D-F#G#A+D-");
-	distributePlayNotes("K40:0.0:+C#-BAG#AG#F#EF#G#AG#AG#F#E");
-	distributePlayNotes("IF#QF#IXXXXSF#G#IAG#F#EF#G#XIF#XAAXBBXAXAAXBAG#A");
-	distributePlayNotes("IXQF#IXXXXSF#G#IAG#F#EF#G#XIF#XAAXBBXAXAAXBAG#A");
-	distributePlayNotes("K40:0.3:SC#F#AQ.+C#SXIC#-BAQ.+C#-HAIX");
-	distributePlayNotes("SC#F#AQ.+C#SXIC#-BAQ.+F#HEIX-");
-	distributePlayNotes("SC#F#AQ.+C#SXIC#-BAQ.+C#-HAIX");
-	distributePlayNotes("SC#F#AQ.+C#SXIC#-BAQ.+F#HG#IX-");
-	distributePlayNotes("K40:0.0:+IAG#XF#XEXF#XG#XHAIX-");
-	distributePlayNotes("+IAG#XF#XEXF#XG#XAXBAG#-");
-	distributePlayNotes("+IAG#XF#XEXF#XG#XHAIX-");
-	distributePlayNotes("+IAG#XF#XEXBXBBXX+C#X-");
-
-	distributePlayNotes("Z02V30+WF#G#ABF#G#AHBQAG#");
-	distributePlayNotes("V35-IC#QC#IXXXXSC#EIF#EC#-B+C#EXIC#XF#F#XG#G#XF#XF#F#XG#F#EF#");
-	distributePlayNotes("IXQC#IXXXXSC#EIF#EC#-B+C#EXIC#XF#F#XG#G#XF#XF#F#XG#F#EF#");
-	distributePlayNotes("V30+WF#AHBEBAWF#AHBEB+C#-");
-	distributePlayNotes("V35IF#EXC#X-B+XC#XEXHF#IX");
-	distributePlayNotes("IF#EXC#X-B+XC#XEXF#XG#F#E");
-	distributePlayNotes("IF#EXC#X-B+XC#XEXHF#IX");
-	distributePlayNotes("IF#EXC#X-B+XG#XG#G#XXAX-");
-
-	distributePlayNotes("Z01V30-SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#+");
-	distributePlayNotes("Z01-HC#XXX");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("HC#XXX");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SDDDDDDDDDDDDDDDD");
-	distributePlayNotes("SDDDDDDDDDDDDDDDD");
-	distributePlayNotes("SEEEEEEEEEEEEEEEE");
-	distributePlayNotes("SEEEEEEEEEEEEEEEE");
-	distributePlayNotes("SDDDDDDDDDDDDDDDD");
-	distributePlayNotes("SDDDDDDDDDDDDDDDD");
-	distributePlayNotes("SEEEEEEEEEEEEEEEE");
-	distributePlayNotes("SEEEEEEEEEEEEEEEE");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SDDDDDDDDEEEEEEEE");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SDDDDDDDDEEEEEEEE");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SDDDDDDDDEEEEEEEE");
-	distributePlayNotes("SF#F#F#F#F#F#F#F#F#F#F#F#F#F#F#F#");
-	distributePlayNotes("SDDDDDDDDEEEEEEEE");
-
-	distributePlayNotes("Z04V45I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00S9090S50509060");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00S9090S50509060");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00Q9");
-	distributePlayNotes("I0S00Q9I0S00Q9I0S00Q9I0S00S9090");*/
-
-	// "Monster Zoo" Hall of Music #6
-	/*distributePlayNotes("V40IB+EEEESD#EIF#ED#F#XF#-");
-	distributePlayNotes("I+GF#EX-");
-	distributePlayNotes("IB+EEEESD#EIF#ED#F#XF#-");
-	distributePlayNotes("I+GF#EX-");
-	distributePlayNotes("Q+BGI+C-BAGF#AXABAGX-");
-	distributePlayNotes("Q+BGI+C-BAGF#AXABAGX-");
-	distributePlayNotes("I-B+EEEESD#EIF#ED#F#XF#");
-	distributePlayNotes("IGF#EX");
-	distributePlayNotes("I-B+EEEESD#EIF#ED#F#XF#");
-	distributePlayNotes("IGF#EX");
-	distributePlayNotes("QBGI+C-BAGF#AXABAGX");
-	distributePlayNotes("QBGI+C-BAGF#AXABAGX");*/
-
-	//distributePlayNotes("P02%700:50:50:0.0080625:--SCC");
-	//distributePlayNotes("P01%50:700:50:0.0080625:--SCC");
-
-	//distributePlayNotes("V40W-FFFF");
-	//distributePlayNotes("V40--HCC#DD#EFF#GG#AA#B+C");
- //distributePlayNotes("V45Z01-HCEG+CEG+CEG+CEG+CEG+");
-	//                         2   3   4   5   6
-	/*distributePlayNotes("V35Q----C+C+C+C+CXX");
-	distributePlayNotes("V35Q----C#+C#+C#+C#+C#XX");
-	distributePlayNotes("V35Q----D+D+D+D+DXX");
-	distributePlayNotes("V35Q----D#+D#+D#+D#+D#XX");
-	distributePlayNotes("V35Q----E+E+E+E+EXX");
-	distributePlayNotes("V35Q----F+F+F+F+FXX");
-	distributePlayNotes("V35Q----F#+F#+F#+F#+F#XX");
-	distributePlayNotes("V35Q----G+G+G+G+GXX");
-	distributePlayNotes("V35Q----G#+G#+G#+G#+G#XX");
-	distributePlayNotes("V35Q----A+A+A+A+AXX");
-	distributePlayNotes("V35Q----A#+A#+A#+A#+A#XX");
-	distributePlayNotes("V35Q----B+B+B+B+BXX");*/
 
 	playVoice();
 }

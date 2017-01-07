@@ -800,7 +800,7 @@ public function prepNextNote(outBuf:Vector.<Number>):Boolean {
 		break;
 		case "@":
 			curOctave = 4;
-			curDuration = T1_DURATION;
+			curDuration = T1_DURATION * tempoMultiplier;
 			tick64CountSize = 2;
 		break;
 		case "%":

@@ -111,7 +111,7 @@ sound effect channels are mixed by Sounds.as, which supports only one
 
 Integer coordinate pair class; used by editor fill operations.
 
-utils.as
+. utils.as
 
 Various low-level utility functions.
 

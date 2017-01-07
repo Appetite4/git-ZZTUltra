@@ -183,7 +183,7 @@ public static function twogrouping(digits:int):String
 {
 	//A 2-digit grouping will always have 2 characters.
 	var str:String = "";
-	if (digits > 10)
+	if (digits < 10)
 		str += "0";
 
 	str += String(digits);

@@ -14,6 +14,9 @@
 	"www/content/2_szt/FOREST.SZT",
 	"www/content/2_szt/MONSTER.SZT",
 	"www/content/2_szt/PROVING.SZT",
+	"www/content/3_wad/CHARDEMO.WAD",
+	"www/content/3_wad/DEMO.WAD",
+	"www/content/3_wad/SMASHZZT.WAD",
 	"www/content/4_zip/winter.zip",
 	"www/content/4_zip/codered.zip"
 ],

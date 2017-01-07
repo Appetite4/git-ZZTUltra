@@ -1582,6 +1582,10 @@ public static function establishGui(guiName:String):Boolean
 		return false;
 	thisGui = guiStorage[guiName];
 
+	// Cancel click-to-move
+	input.c2MDestX = -1;
+	input.c2MDestY = -1;
+
 	// Get top-level GUI variables
 	Use40Column = int(utils.ciLookup(thisGui, "Use40Column"));
 	OverallSizeX = int(utils.ciLookup(thisGui, "OverallSizeX"));
@@ -1824,6 +1828,8 @@ public static function drawGui():Boolean
 		drawGuiLabel("VERSIONTEXT", globalProps["VERSION"].toString());
 		drawGuiLabel("BUILDTEXT", "AS3 Build");
 		drawGuiLabel("SPECIALTEXT", "Prototype");
+		//drawGuiLabel("SPECIALTEXT", "NG Special");
+		Sounds.distributePlayNotes("U137");
 	}
 
 	return true;
@@ -3758,7 +3764,6 @@ public static function mTick(event:TimerEvent):void
 				{
 					// GUI successfully established for main menu; set up and draw.
 					mainMode = MODE_NORM;
-					//mg.writeConst(0, 0, OverallSizeX, OverallSizeY, " ", 31);
 					drawGui();
 
 					// Load main OOP definition file

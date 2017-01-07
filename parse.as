@@ -24,6 +24,7 @@ public static const domainPrefix = "";
 // Dataset vars
 public static var dataset:String;
 public static var jsonObj:Object;
+public static var embedData:ByteArray;
 public static var fileRef:FileReference;
 public static var origFileData:ByteArray;
 public static var fileData:ByteArray;
@@ -43,6 +44,39 @@ public static var loadingSuccess:Boolean = false;
 public static var localFileSource:Boolean = false;
 public static var cancellingAction:int = zzt.MODE_NORM;
 
+// The following "embedding" section is designed to act as a special-build
+// interface for an all-in-one SWF redistributable.  If used, embedded files
+// will be substituted for the files loaded from the configuration.
+// This can be useful if the hosting platform does not readily support
+// external file loading.
+
+// Uncomment to embed binary files
+/*
+[Embed(source="guis/zzt_ini.txt", mimeType="application/octet-stream")] static private var emb_zzt_ini : Class;
+[Embed(source="guis/zzt_guis.txt", mimeType="application/octet-stream")] static private var emb_zzt_guis : Class;
+[Embed(source="guis/zzt_objs.txt", mimeType="application/octet-stream")] static private var emb_zzt_objs : Class;
+[Embed(source="www/content/3_wad/SMASHZZT.WAD", mimeType="application/octet-stream")] static private var emb_autoload_world : Class;
+*/
+
+// Uncomment to register embedded binary files to be visible to loadRemoteFile
+public static var embeddedFiles:Array = [
+/*
+["guis/zzt_ini.txt", emb_zzt_ini],
+["guis/zzt_guis.txt", emb_zzt_guis],
+["guis/zzt_objs.txt", emb_zzt_objs],
+["www/content/3_wad/SMASHZZT.WAD", emb_autoload_world]
+*/
+];
+
+public static function getEmbeddedFile(fName:String):ByteArray {
+	for (var i:int = 0; i < embeddedFiles.length; i++) {
+		if (fName == embeddedFiles[i][0])
+			return (new (embeddedFiles[i][1])() as ByteArray);
+	}
+
+	return null;
+}
+
 public static function loadTextFile(filename:String, action:int):void {
 	localFileSource = false;
 	loadingName = filename;
@@ -51,6 +85,14 @@ public static function loadTextFile(filename:String, action:int):void {
 
 	loadingMessage = "Loading " + filename + "...";
 	loadingSuccess = false;
+
+	embedData = getEmbeddedFile(filename);
+	if (embedData != null)
+	{
+		// Special embedded file instant-load.
+		loaderCompleteHandler(null);
+		return;
+	}
 
 	try {
 		myLoader = new URLLoader(new URLRequest(domainPrefix + filename));
@@ -77,7 +119,12 @@ public static function errorHandler(e:IOErrorEvent):void {
 }
 
 public static function loaderCompleteHandler(event:Event):void {
-	dataset = myLoader.data;
+	if (embedData != null)
+		dataset = embedData.readUTFBytes(embedData.length);
+		//dataset = ZZTLoader.readExtendedASCIIString(embedData, embedData.length);
+	else
+		dataset = myLoader.data;
+
 	if (loadingAction == zzt.MODE_LOADMAIN || loadingAction == zzt.MODE_LOADDEFAULTOOP ||
 		loadingAction == zzt.MODE_LOADINI)
 	{
@@ -228,7 +275,16 @@ public static function loadRemoteFile(filename:String, action:int, specStr=""):v
 		}
 	} while (i != -1);
 
+	embedData = getEmbeddedFile(filename);
+	if (embedData != null)
+	{
+		// Special embedded file instant-load.
+		bCompleteHandler(null);
+		return;
+	}
+
 	zzt.showLoadingAnim = true;
+
 	try {
 		myLoader = new URLLoader();
 		myLoader.dataFormat = URLLoaderDataFormat.BINARY;
@@ -262,6 +318,8 @@ public static function bCompleteHandler(event:Event):void {
 		fileData = fileRef.data;
 		lastFileName = fileRef.name;
 	}
+	else if (embedData != null)
+		fileData = embedData;
 	else
 		fileData = myLoader.data;
 
