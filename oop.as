@@ -77,6 +77,7 @@ public static const CMD_COLORALL:int = 52;
 public static const CMD_DRAWCHAR:int = 53;
 public static const CMD_ERASECHAR:int = 54;
 public static const CMD_GHOST:int = 55;
+public static const CMD_KILLPOS:int = 56;
 
 // Movement/Pushing command constants
 public static const CMD_SETPOS:int = 60;
@@ -96,6 +97,8 @@ public static const CMD_DUMPSE:int = 73;
 public static const CMD_DUMPSEAT:int = 74;
 public static const CMD_TEXTTOGUI:int = 75;
 public static const CMD_TEXTTOGRID:int = 76;
+public static const CMD_SCROLLSTR:int = 77;
+public static const CMD_SCROLLCOLOR:int = 78;
 
 // Set/Get special command constants
 public static const CMD_SETPLAYER:int = 80;
@@ -243,6 +246,8 @@ public static const DIR_RNDSQ:int = 20;
 public static const DIR_TOWARDS:int = 21;
 public static const DIR_MAJOR:int = 22;
 public static const DIR_MINOR:int = 23;
+public static const DIR_UNDER:int = 24;
+public static const DIR_OVER:int = 25;
 
 // Inventory constants
 public static const INV_NONE:int = 0;
@@ -254,6 +259,7 @@ public static const INV_SCORE:int = 5;
 public static const INV_TIME:int = 6;
 public static const INV_Z:int = 7;
 public static const INV_KEY:int = 8;
+public static const INV_EXTRA:int = 9;
 
 // Color constants
 public static const COLOR_BLACK:int = 0;
@@ -282,6 +288,8 @@ public static const MISC_OTHERS:int = 4;
 public static const MISC_THEN:int = 5;
 public static const MISC_CLONE:int = 6;
 public static const MISC_SILENT:int = 7;
+public static const MISC_UNDER:int = 8;
+public static const MISC_OVER:int = 9;
 
 // "Keyword arg" constants
 public static const KWARG_TYPE:int = 1;
@@ -449,7 +457,8 @@ public static var commands_x:Array = [
 	"DRAWCHAR",					// Draw a character to the grid (nonpermanent)
 	"ERASECHAR",				// Erase a (nonpermanent) character from the grid
 	"GHOST",					// Change object's ghost flag status and appearance
-	"\x1F","\x1F","\x1F","\x1F",
+	"KILLPOS",					// Kill an object at the specified coordinates.
+	"\x1F","\x1F","\x1F",
 
 	"SETPOS",                   // Sets X and Y of status element; no movement messages
 	"FORCEGO",                  // "Nuclear" version of GO; does not push and will overwrite
@@ -465,9 +474,11 @@ public static var commands_x:Array = [
 	"DYNTEXTVAR",				// Set global variable to dynamic string.
 	"DUMPSE",					// Dump a status element as scroll text
 	"DUMPSEAT",					// Dump a status element as scroll text at coordinates
-	"TEXTTOGUI",					// Re-route text to a GUI label
+	"TEXTTOGUI",				// Re-route text to a GUI label
 	"TEXTTOGRID",				// Re-route text to a region in the grid
-	"\x1F","\x1F","\x1F",
+	"SCROLLSTR",				// "Scroll" a string into a toast message label
+	"SCROLLCOLOR",				// Modify scroll interface color scheme
+	"\x1F",
 
 	"SETPLAYER",				// Set the player's object.
 	"SETPROPERTY",              // Set world or board property
@@ -752,6 +763,8 @@ public static var miscKeywords_x:Array = [
 
 	"CLONE",                    // Kind established from last CLONE command
 	"SILENT",                   // Inhibits sound for some actions
+	"UNDER",					// Modifies placement of new objects
+	"OVER",						// Modifies placement of new objects
 ];
 
 // Keywords used with KIND or dot operator
@@ -1463,12 +1476,23 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				idx = parseKind(b, line, idx);
 			break;
 			case CMD_PUT:
-				idx = parseDirection(b, line, idx);
-				if (idx == -1)
+				otherType = findMatching(line.substr(idx), miscKeywords_1);
+				if (otherType == MISC_UNDER-1 || otherType == MISC_OVER-1)
 				{
-					postErrorMsg(b, "Bad direction", 1);
-					return idx;
+					idx = findNonKW(line, idx);
+					idx = findNonWS(line, idx);
+					b.push(DIR_UNDER + otherType - (MISC_UNDER-1));
 				}
+				else
+				{
+					idx = parseDirection(b, line, idx);
+					if (idx == -1)
+					{
+						postErrorMsg(b, "Bad direction", 1);
+						return idx;
+					}
+				}
+
 				idx = findNonWSComma(line, idx);
 				idx = parseKind(b, line, idx);
 			break;
@@ -1506,6 +1530,7 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				otherType = findMatching(line.substr(idx), colors_1);
 				if (otherType != -1 && oopType == -3)
 				{
+					// Colored key inventory
 					b.push(INV_KEY);
 					b.push(otherType);
 
@@ -1516,10 +1541,27 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				}
 				else
 				{
+					// Conventional inventory
 					otherType = findMatching(line.substr(idx), inventory_1);
 					if (otherType >= INV_KEY-1 || otherType < 0)
-						otherType = -1; // Inventory needs to work even if wrong
-					b.push(otherType+1);
+					{
+						if (oopType == -3)
+						{
+							// ZZT Ultra mode lets any property work as inventory
+							b.push(INV_EXTRA);
+							otherType = INV_EXTRA + 1;
+							nextIdx = findNonKW(line, idx);
+							b.push(addString(line.substring(idx, nextIdx)));
+						}
+						else
+						{
+							// Inventory needs to work even if wrong
+							b.push(INV_NONE);
+							otherType = -1;
+						}
+					}
+					else
+						b.push(otherType+1);
 				}
 
 				// Amount to give/take
@@ -1663,16 +1705,12 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 						idx = parseKind(b, line, idx);
 					break;
 					case FLAG_ANYIN:
-						nextIdx = findNonKW(line, idx);
-						b.push(addString(line.substring(idx, nextIdx)));
-
-						idx = findNonWSComma(line, nextIdx);
+						idx = parseExpr(b, line, idx);
+						idx = findNonWSComma(line, idx);
 						idx = parseKind(b, line, idx);
 					break;
 					case FLAG_SELFIN:
-						nextIdx = findNonKW(line, idx);
-						b.push(addString(line.substring(idx, nextIdx)));
-						idx = nextIdx;
+						idx = parseExpr(b, line, idx);
 					break;
 					case FLAG_TYPEIS:
 						idx = parseCoords(b, line, idx);
@@ -1757,6 +1795,16 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				idx = findNonWS(line, idx);
 			break;
 			case CMD_SPAWN:
+				otherType = findMatching(line.substr(idx), miscKeywords_1);
+				if (otherType == MISC_UNDER-1 || otherType == MISC_OVER-1)
+				{
+					idx = findNonKW(line, idx);
+					idx = findNonWS(line, idx);
+					b.push(DIR_UNDER + otherType - (MISC_UNDER-1));
+				}
+				else
+					b.push(0);
+
 				idx = parseCoords(b, line, idx);
 				idx = findNonWSComma(line, idx);
 				idx = parseKind(b, line, idx);
@@ -1775,6 +1823,17 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 			case CMD_SETPOS:
 				idx = parseExpr(b, line, idx);
 				idx = findNonWSComma(line, idx);
+
+				otherType = findMatching(line.substr(idx), miscKeywords_1);
+				if (otherType == MISC_UNDER-1 || otherType == MISC_OVER-1)
+				{
+					idx = findNonKW(line, idx);
+					idx = findNonWS(line, idx);
+					b.push(DIR_UNDER + otherType - (MISC_UNDER-1));
+				}
+				else
+					b.push(0);
+
 				idx = parseCoords(b, line, idx);
 			break;
 			case CMD_TYPEAT:
@@ -1805,13 +1864,12 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 			break;
 			case CMD_LIGHTEN:
 			case CMD_DARKEN:
+			case CMD_KILLPOS:
 				idx = parseCoords(b, line, idx);
 			break;
 			case CMD_CHANGEREGION:
-				nextIdx = findNonKW(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-
-				idx = findNonWSComma(line, nextIdx);
+				idx = parseExpr(b, line, idx);
+				idx = findNonWSComma(line, idx);
 				idx = parseKind(b, line, idx);
 				idx = findNonWSComma(line, idx);
 				idx = parseKind(b, line, idx);
@@ -1820,18 +1878,14 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				idx = parseCoords(b, line, idx);
 			break;
 			case CMD_SETREGION:
-				nextIdx = findNonKW(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-
-				idx = findNonWSComma(line, nextIdx);
+				idx = parseExpr(b, line, idx);
+				idx = findNonWSComma(line, idx);
 				idx = parseCoords(b, line, idx);
 				idx = findNonWSComma(line, idx);
 				idx = parseCoords(b, line, idx);
 			break;
 			case CMD_CLEARREGION:
-				nextIdx = findNonKW(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-				idx = nextIdx;
+				idx = parseExpr(b, line, idx);
 			break;
 			case CMD_SETPROPERTY:
 				nextIdx = findNonKWDynamic(line, idx);
@@ -1920,6 +1974,28 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				b.push(addString(line.substring(idx, sepLoc)));
 				b.push(addCString(line.substring(sepLoc+1)));
 			break;
+			case CMD_SCROLLSTR:
+				idx = parseExpr(b, line, idx);
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx);
+				idx = findNonWS(line, idx);
+				b.push(addCString(line.substring(idx)));
+			break;
+			case CMD_SCROLLCOLOR:
+				idx = parseExpr(b, line, idx); // Border
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Shadow
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Background
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Text
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Center Text
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Button
+				idx = findNonWSComma(line, idx);
+				idx = parseExpr(b, line, idx); // Arrow
+			break;
 			case CMD_DUMPSE:
 			case CMD_SETPLAYER:
 				idx = parseExpr(b, line, idx);
@@ -1932,9 +2008,8 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				b.push(addString(line.substring(idx, nextIdx)));
 			break;
 			case CMD_TEXTTOGRID:
-				nextIdx = findNonKWDynamic(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-				idx = findNonWSComma(line, nextIdx);
+				idx = parseExpr(b, line, idx);
+				idx = findNonWSComma(line, idx);
 				idx = parseExpr(b, line, idx);
 			break;
 
@@ -2057,10 +2132,7 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 			case CMD_FOREACH:
 				idx = parseExpr(b, line, idx, true);
 				idx = findNonWSComma(line, idx);
-
-				nextIdx = findNonKW(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-				idx = nextIdx;
+				idx = parseExpr(b, line, idx);
 			break;
 			case CMD_FORMASK:
 				idx = parseExpr(b, line, idx, true);
@@ -2079,10 +2151,7 @@ public static function parseCommand(b:Array, line:String, idx:int):int {
 				idx = findNonWSComma(line, idx);
 				idx = parseExpr(b, line, idx, true);
 				idx = findNonWSComma(line, idx);
-
-				nextIdx = findNonKW(line, idx);
-				b.push(addString(line.substring(idx, nextIdx)));
-				idx = nextIdx;
+				idx = parseExpr(b, line, idx);
 			break;
 
 			case CMD_PUSHARRAY:
@@ -2437,6 +2506,10 @@ public static function parseKind(b:Array, line:String, idx:int):int {
 		b.push(SPEC_KWARGEND);
 		return idx;
 	}
+
+	// Skip '#' if present
+	if (line.charAt(idx) == '#')
+		idx++;
 
 	// Check if kind is a special representation
 	var sType:int = findMatching(line.substr(idx), miscKeywords_1);

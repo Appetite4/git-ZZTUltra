@@ -219,6 +219,8 @@ public static var prefEditorGui:String = "ED_ULTRA1";
 public static var propDictToUpdate:Object;
 public static var propSubset:Object;
 public static var generalSubset:Boolean = false;
+public static var aSubsetName:String = "";
+public static var optCursor:int = 0;
 public static var Use40Column:int;
 public static var OverallSizeX:int;
 public static var OverallSizeY:int;
@@ -281,7 +283,7 @@ public static var guiPropLabel:TextField;
 
 public static var scrollArea:DisplayObjectContainer;
 public static var main_scrollArea:ScrollFrame;
-public static var solid_scrollArea:S_ScrollFrame;
+//public static var solid_scrollArea:S_ScrollFrame;
 public static var scrollUL:DisplayObject;
 public static var scrollUR:DisplayObject;
 public static var scrollDL:DisplayObject;
@@ -291,6 +293,19 @@ public static var scrollU2:DisplayObject;
 public static var scrollD1:DisplayObject;
 public static var scrollL1:DisplayObject;
 public static var scrollR1:DisplayObject;
+public static var scrollGeom:Array = [];
+public static var scrollBitmaps:Array = [ [], [] ];
+public static var sbmRed:Array = [];
+public static var sbmGreen:Array = [];
+public static var sbmBlue:Array = [];
+public static var sbmAlpha:Array = [];
+public static var sBorderColor:uint = 0xFFFFFFFF;
+public static var sShadowColor:uint = 0xFF000000;
+public static var sBGColor:uint = 0xFF0000AA;
+public static var sTextColor:int = 30;
+public static var sCenterTextColor:int = 31;
+public static var sButtonColor:int = 29;
+public static var sArrowColor:int = 28;
 public static var titleGrid:CellGrid; // Scroll-area-specific grid
 public static var scrollGrid:CellGrid; // Scroll-area-specific grid
 
@@ -351,8 +366,9 @@ public static var confButtonTextYes:String = " Yes ";
 public static var confButtonTextNo:String = " No ";
 public static var confButtonColorSelYes:int = 32 + 15;
 public static var confButtonColorSelNo:int = 64 + 15;
-public static var confButtonColorYes:int = 16 + 10;
-public static var confButtonColorNo:int = 16 + 12;
+public static var confButtonColorYes:int = 10;
+public static var confButtonColorNo:int = 12;
+public static var confButtonUnderBG:int = 0;
 public static var confButtonUnderText:Array = [];
 public static var confButtonUnderColors:Array = [];
 
@@ -455,26 +471,19 @@ public static function init(myStage:Stage, setEventHandlers:Boolean=true) {
 	// Add text portions of ScrollArea to the stage
 	titleGrid = new CellGrid(CHARS_WIDTH, 1);
 	titleGrid.visible = false;
-	titleGrid.writeConst(0, 0, CHARS_WIDTH, 1, " ", 30);
+	titleGrid.writeConst(0, 0, CHARS_WIDTH, 1, " ", sTextColor);
 	stage.addChild(titleGrid);
 	scrollGrid = new CellGrid(CHARS_WIDTH, CHARS_HEIGHT);
 	scrollGrid.visible = false;
-	scrollGrid.writeConst(0, 0, CHARS_WIDTH, CHARS_HEIGHT, " ", 30);
+	scrollGrid.writeConst(0, 0, CHARS_WIDTH, CHARS_HEIGHT, " ", sTextColor);
 	stage.addChild(scrollGrid);
 
 	// Add ScrollFrame to the stage
 	main_scrollArea = new ScrollFrame();
 	main_scrollArea.visible = false;
-	stage.addChild(main_scrollArea);
-
-	// Add S_ScrollFrame to the stage
-	// This is an alternate display that is closer to original ZZT
-	solid_scrollArea = new S_ScrollFrame();
-	solid_scrollArea.visible = false;
-	stage.addChild(solid_scrollArea);
-
-	scrollArea = main_scrollArea;
 	setScrollCornerMapping(main_scrollArea);
+	scrollArea.visible = false;
+	stage.addChild(scrollArea);
 
 	// Add GUI properties to the stage
 	guiProperties = new GUIProperties();
@@ -526,7 +535,7 @@ public static function init(myStage:Stage, setEventHandlers:Boolean=true) {
 	globalProps["SOUNDOFF"] = 0;
 	globalProps["BECOMESAMECOLOR"] = 0;
 	globalProps["LIBERALCOLORCHANGE"] = 0;
-	globalProps["VERSION"] = ZZTLoader.defaultPropsGeneral["VERSION"];
+	globalProps["VERSION"] = ZZTProp.defaultPropsGeneral["VERSION"];
 	globalProps["MOUSEBEHAVIOR"] = 3;
 	globalProps["IMMEDIATESCROLL"] = 0;
 	globalProps["ORIGINALSCROLL"] = 0;
@@ -564,8 +573,8 @@ public static function init(myStage:Stage, setEventHandlers:Boolean=true) {
 
 	statElem = new Vector.<SE>();
 	editor.newWorldSetup();
-	ZZTLoader.setOverridePropDefaults();
-	ZZTLoader.overridePropsGeneral = ZZTLoader.overridePropsGenModern;
+	ZZTProp.setOverridePropDefaults();
+	ZZTProp.overridePropsGeneral = ZZTProp.overridePropsGenModern;
 
 	// Initialize sounds
 	Sounds.initAllSounds(soundFx, globalProps);
@@ -652,23 +661,23 @@ public static function initSharedObj():void {
 			var o:Object = zztSO.data[soName];
 			for (var s:String in o) {
 				if (soName == "CFGMODERN")
-					ZZTLoader.overridePropsGenModern[s] = o[s];
+					ZZTProp.overridePropsGenModern[s] = o[s];
 				else if (soName == "CFGCLASSIC")
-					ZZTLoader.overridePropsGenClassic[s] = o[s];
+					ZZTProp.overridePropsGenClassic[s] = o[s];
 				else if (soName == "CFGZZTSPEC")
-					ZZTLoader.overridePropsZZT[s] = o[s];
+					ZZTProp.overridePropsZZT[s] = o[s];
 				else if (soName == "CFGSZTSPEC")
-					ZZTLoader.overridePropsSZT[s] = o[s];
+					ZZTProp.overridePropsSZT[s] = o[s];
 			}
 		}
 
 		if (depGETVars.hasOwnProperty("CONFIGTYPE"))
 		{
 			var cTypeVal:int = utils.int0(depGETVars["CONFIGTYPE"]);
-			ZZTLoader.overridePropsGenModern["CONFIGTYPE"] = cTypeVal;
+			ZZTProp.overridePropsGenModern["CONFIGTYPE"] = cTypeVal;
 		}
 
-		setConfigType(ZZTLoader.overridePropsGenModern["CONFIGTYPE"] & 1);
+		setConfigType(ZZTProp.overridePropsGenModern["CONFIGTYPE"] & 1);
 
 		// Saved medal list
 		if (zztSO.data.hasOwnProperty("MEDALLIST"))
@@ -780,15 +789,15 @@ public static function establishINI():Boolean {
 			if ((v.charCodeAt(0) >= 48 && v.charCodeAt(0) <= 57) || v.charAt(0) == "-")
 			{
 				// Integer property
-				ZZTLoader.defaultPropsGeneral[k] = int(v);
-				ZZTLoader.overridePropsGeneral[k] = int(v);
+				ZZTProp.defaultPropsGeneral[k] = int(v);
+				ZZTProp.overridePropsGeneral[k] = int(v);
 				globalProps[k] = int(v);
 			}
 			else
 			{
 				// String property
-				ZZTLoader.defaultPropsGeneral[k] = v;
-				ZZTLoader.overridePropsGeneral[k] = v;
+				ZZTProp.defaultPropsGeneral[k] = v;
+				ZZTProp.overridePropsGeneral[k] = v;
 				globalProps[k] = v;
 			}
 		}
@@ -2100,6 +2109,9 @@ public static function drawConfButtons():void {
 	// If no under-text established, remember it now.
 	if (confButtonUnderText.length == 0)
 	{
+		confButtonUnderBG = mg.getAttr(GuiLocX + confButtonX - 2, GuiLocY + confButtonY - 2);
+		confButtonUnderBG = confButtonUnderBG & (7 << 3);
+
 		for (var i:int = 0; i < 10; i++)
 		{
 			confButtonUnderText.push(
@@ -2110,11 +2122,13 @@ public static function drawConfButtons():void {
 	}
 
 	// Draw "Yes" button
-	var color:int = (confButtonSel == 0) ? confButtonColorSelYes : confButtonColorYes;
+	var color:int = (confButtonSel == 0) ?
+		confButtonColorSelYes : (confButtonUnderBG | confButtonColorYes);
 	mg.writeStr(GuiLocX + confButtonX - 2, GuiLocY + confButtonY - 2, confButtonTextYes, color);
 
 	// Draw "No" button
-	color = (confButtonSel == 1) ? confButtonColorSelNo : confButtonColorNo;
+	color = (confButtonSel == 1) ?
+		confButtonColorSelNo : (confButtonUnderBG | confButtonColorNo);
 	mg.writeStr(GuiLocX + confButtonX + 6 - 2, GuiLocY + confButtonY - 2, confButtonTextNo, color);
 }
 
@@ -2516,17 +2530,14 @@ public static function ScrollMsg(objName:String=""):void {
 	mouseScrollOffset = 0;
 
 	// Erase previous scroll interface text.
-	titleGrid.silentErase(32, 31);
-	scrollGrid.silentErase(32, 28);
-	//scrollGrid.writeConst(0, 0, msgScrollWidth, msgScrollHeight, " ", 28);
-	//scrollGrid.writeConst(2+msgScrollWidth, 0, 1, msgScrollHeight, " ", 28);
+	titleGrid.silentErase(32, sTextColor);
+	scrollGrid.silentErase(32, sArrowColor);
 
 	// Set up scroll frame type per configuration.
 	if (globalProps["OVERLAYSCROLL"])
-		scrollArea = main_scrollArea;
+		setScrollBitmapColors(0);
 	else
-		scrollArea = solid_scrollArea;
-	setScrollCornerMapping(scrollArea);
+		setScrollBitmapColors(1);
 
 	// Set new "final" dimensions and initial scroll message text.
 	curScrollCols = msgScrollWidth;
@@ -2554,16 +2565,154 @@ public static function ScrollMsg(objName:String=""):void {
 	modeChanged = true;
 }
 
+// Get scroll component geometry (position and size).
+public static function getScrollGeom(sa:DisplayObjectContainer, name:String, idx:int):void {
+	var d:DisplayObject = getSuperChildByName(sa, name);
+	scrollGeom.push([idx, d.x, d.y, d.width, d.height]);
+}
+
+// Set scroll object corner mapping geometry.
 public static function setScrollCornerMapping(sa:DisplayObjectContainer):void {
-	scrollUL = getSuperChildByName(sa, "ul");
-	scrollUR = getSuperChildByName(sa, "ur");
-	scrollDL = getSuperChildByName(sa, "dl");
-	scrollDR = getSuperChildByName(sa, "dr");
-	scrollU1 = getSuperChildByName(sa, "u1");
-	scrollU2 = getSuperChildByName(sa, "u2");
-	scrollD1 = getSuperChildByName(sa, "d1");
-	scrollL1 = getSuperChildByName(sa, "l1");
-	scrollR1 = getSuperChildByName(sa, "r1");
+	// Get geometry of each piece in frame.
+	getScrollGeom(sa, "ul", 0);
+	getScrollGeom(sa, "ur", 1);
+	getScrollGeom(sa, "dl", 2);
+	getScrollGeom(sa, "dr", 3);
+	getScrollGeom(sa, "u1", 4);
+	getScrollGeom(sa, "u2", 5);
+	getScrollGeom(sa, "d1", 6);
+	getScrollGeom(sa, "l1", 7);
+	getScrollGeom(sa, "r1", 8);
+
+	// Create bitmap substitutions.
+	createScrollSubs(0, [ BMScrollUL, BMScrollUR, BMScrollDL, BMScrollDR,
+		BMScrollU1, BMScrollU2, BMScrollD1, BMScrollL1, BMScrollR1 ]);
+	createScrollSubs(1, [ BMScrollUL_S, BMScrollUR_S, BMScrollDL_S, BMScrollDR_S,
+		BMScrollU1_S, BMScrollU2_S, BMScrollD1_S, BMScrollL1_S, BMScrollR1_S ]);
+}
+
+// Create bitmap substitutions for a specific set of scroll bitmap classes.
+public static function createScrollSubs(idx:int, classArray:Array):void {
+	var bmpArray:Array = scrollBitmaps[idx];
+
+	for (var n:int = 0; n < classArray.length; n++) {
+
+		// Establish source and destination bitmaps.
+		var srcBmd:BitmapData = new (classArray[n])(scrollGeom[n][3], scrollGeom[n][4]);
+		var bmd:BitmapData = new BitmapData(scrollGeom[n][3], scrollGeom[n][4]);
+
+		// Create palette-mapped bitmap data from source bitmap.
+		for (var y:int = 0; y < srcBmd.height; y++) {
+			for (var x:int = 0; x < srcBmd.width; x++) {
+				var pVal:uint = srcBmd.getPixel32(x, y);
+				switch (pVal) {
+					case 0xFFFFFFFF: // Border
+						bmd.setPixel32(x, y, 0xFFFFFFFF);
+					break;
+					case 0xFF000000: // Shadow
+						bmd.setPixel32(x, y, 0xFF808080);
+					break;
+					case 0xFF0000AA: // BG
+						bmd.setPixel32(x, y, 0xFFC0C0C0);
+					break;
+					default: // Transparent
+						bmd.setPixel32(x, y, 0x00000000);
+					break;
+				}
+			}
+		}
+
+		bmpArray.push(bmd);
+	}
+
+	// Only create target scroll area if not already created.
+	if (idx != 0)
+		return;
+
+	// Create new scroll area.
+	scrollArea = new MovieClip();
+	for (n = 0; n < bmpArray.length; n++) {
+		var bm:Bitmap = new Bitmap(new BitmapData(scrollGeom[n][3], scrollGeom[n][4]));
+		scrollArea.addChild(bm);
+		bm.x = scrollGeom[n][1];
+		bm.y = scrollGeom[n][2];
+	}
+
+	scrollUL = scrollArea.getChildAt(0);
+	scrollUR = scrollArea.getChildAt(1);
+	scrollDL = scrollArea.getChildAt(2);
+	scrollDR = scrollArea.getChildAt(3);
+	scrollU1 = scrollArea.getChildAt(4);
+	scrollU2 = scrollArea.getChildAt(5);
+	scrollD1 = scrollArea.getChildAt(6);
+	scrollL1 = scrollArea.getChildAt(7);
+	scrollR1 = scrollArea.getChildAt(8);
+}
+
+// Set bitmaps for a specific scroll container.
+public static function setScrollBitmapColors(idx:int):void {
+	// Update palette lookup tables.
+	sbmRed.length = 256;
+	sbmGreen.length = 256;
+	sbmBlue.length = 256;
+	sbmAlpha.length = 256;
+	for (var j:int = 0; j < 256; j++) {
+		sbmRed[j] = 0;
+		sbmGreen[j] = 0;
+		sbmBlue[j] = 0;
+		sbmAlpha[j] = 0xFF000000;
+	}
+
+	sbmAlpha[0] = 0;
+	sbmRed[0xFF] = sBorderColor & 16711680;
+	sbmGreen[0xFF] = sBorderColor & 65280;
+	sbmBlue[0xFF] = sBorderColor & 255;
+	sbmRed[0x80] = sShadowColor & 16711680;
+	sbmGreen[0x80] = sShadowColor & 65280;
+	sbmBlue[0x80] = sShadowColor & 255;
+	sbmRed[0xC0] = sBGColor & 16711680;
+	sbmGreen[0xC0] = sBGColor & 65280;
+	sbmBlue[0xC0] = sBGColor & 255;
+
+	// Update bitmaps with palette-mapped colors.
+	var tPoint:Point = new Point(0, 0);
+	for (var i:int = 0; i < 9; i++)
+	{
+		var bmd:BitmapData = scrollBitmaps[idx][i];
+		var destBmd:BitmapData = (scrollArea.getChildAt(i) as Bitmap).bitmapData;
+		var sourceRect:Rectangle = new Rectangle(0, 0, bmd.width, bmd.height);
+
+		destBmd.paletteMap(bmd, sourceRect, tPoint,
+			sbmRed, sbmGreen, sbmBlue, sbmAlpha);
+	}
+}
+
+// Set color indexes for scroll interface.
+public static function setScrollColors(colBorder:int, colShadow:int, colBG:int,
+	colText:int, colCenterText:int, colButton:int, colArrow:int):void {
+
+	// Frame colors
+	var idx:int = colBorder * 3;
+	sBorderColor = mg.colors16[idx + 0] | mg.colors16[idx + 1] | mg.colors16[idx + 2];
+	idx = colShadow * 3;
+	sShadowColor = mg.colors16[idx + 0] | mg.colors16[idx + 1] | mg.colors16[idx + 2];
+	idx = colBG * 3;
+	sBGColor = mg.colors16[idx + 0] | mg.colors16[idx + 1] | mg.colors16[idx + 2];
+
+	// Cell colors
+	sTextColor = (colText & 15) + (colBG << 4);
+	sCenterTextColor = (colCenterText & 15) + (colBG << 4);
+	sButtonColor = (colButton & 15) + (colBG << 4);
+	sArrowColor = (colArrow & 15) + (colBG << 4);
+
+	// Update properties
+	globalProps["SCRCOLBORDER"] = colBorder;
+	globalProps["SCRCOLSHADOW"] = colShadow;
+	globalProps["SCRCOLBG"] = colBG;
+	globalProps["SCRCOLTEXT"] = colText;
+	globalProps["SCRCOLCENTERTEXT"] = colCenterText;
+	globalProps["SCRCOLBUTTON"] = colButton;
+	globalProps["SCRCOLARROW"] = colArrow;
 }
 
 // Set dimensions of "Scroll" large text box.
@@ -2629,15 +2778,15 @@ public static function drawScrollMsgText():void {
 		if (curIndex < -1 || curIndex > msgScrollText.length)
 		{
 			// Out of message boundaries; display blank line.
-			scrollGrid.writeConst(2, cy, msgScrollWidth, 1, " ", 30);
+			scrollGrid.writeConst(2, cy, msgScrollWidth, 1, " ", sTextColor);
 		}
 		else if (curIndex == -1 || curIndex == msgScrollText.length)
 		{
 			// On message boundaries; display dotted line.
 			for (var cx:int = 0; cx < msgScrollWidth; cx += 5)
 			{
-				scrollGrid.writeConst(1+cx, cy, msgScrollWidth, 1, " ", 30);
-				scrollGrid.setCell(1+cx+4, cy, 7, 30);
+				scrollGrid.writeConst(1+cx, cy, msgScrollWidth, 1, " ", sTextColor);
+				scrollGrid.setCell(1+cx+4, cy, 7, sTextColor);
 			}
 		}
 		else
@@ -2649,10 +2798,11 @@ public static function drawScrollMsgText():void {
 			if (fmt == "")
 			{
 				// No formatting; display ordinary line.
-				scrollGrid.writeStr(2, cy, txt, 30);
+				scrollGrid.writeStr(2, cy, txt, sTextColor);
 
 				// Erase rest of line
-				scrollGrid.writeConst(2+lineLen, cy, msgScrollWidth-lineLen+1, 1, " ", 30);
+				scrollGrid.writeConst(2+lineLen, cy,
+					msgScrollWidth-lineLen+1, 1, " ", sTextColor);
 			}
 			else if (fmt == "$")
 			{
@@ -2662,20 +2812,22 @@ public static function drawScrollMsgText():void {
 					txt = " " + txt;
 				lineLen = txt.length;
 
-				scrollGrid.writeStr(2, cy, txt, 31);
+				scrollGrid.writeStr(2, cy, txt, sCenterTextColor);
 
 				// Erase rest of line
-				scrollGrid.writeConst(2+lineLen, cy, msgScrollWidth-lineLen+1, 1, " ", 31);
+				scrollGrid.writeConst(2+lineLen, cy,
+					msgScrollWidth-lineLen+1, 1, " ", sCenterTextColor);
 			}
 			else
 			{
 				// Link; display link button and line.
-				scrollGrid.writeConst(2, cy, 6, 1, " ", 31);
-				scrollGrid.setCell(2+2, cy, 16, 29);
-				scrollGrid.writeStr(2+5, cy, txt, 31);
+				scrollGrid.writeConst(2, cy, 6, 1, " ", sCenterTextColor);
+				scrollGrid.setCell(2+2, cy, 16, sButtonColor);
+				scrollGrid.writeStr(2+5, cy, txt, sCenterTextColor);
 
 				// Erase rest of line
-				scrollGrid.writeConst(2+5+lineLen, cy, msgScrollWidth-lineLen-5+1, 1, " ", 31);
+				scrollGrid.writeConst(2+5+lineLen, cy,
+					msgScrollWidth-lineLen-5+1, 1, " ", sCenterTextColor);
 
 				// Signal to change title bar if link at cursor
 				if (msgScrollIndex + mouseScrollOffset == curIndex)
@@ -2687,9 +2839,9 @@ public static function drawScrollMsgText():void {
 	}
 
 	// Draw cursor arrows (always visible).
-	scrollGrid.writeConst(0, 0, 1, msgScrollHeight, " ", 28);
-	scrollGrid.setCell(0, backupLen + mouseScrollOffset, 175, 28);
-	scrollGrid.setCell(2+msgScrollWidth, backupLen + mouseScrollOffset, 174, 28);
+	scrollGrid.writeConst(0, 0, 1, msgScrollHeight, " ", sArrowColor);
+	scrollGrid.setCell(0, backupLen + mouseScrollOffset, 175, sArrowColor);
+	scrollGrid.setCell(2+msgScrollWidth, backupLen + mouseScrollOffset, 174, sArrowColor);
 
 	// Set title based on context.
 	var titleText:String = "Interaction";
@@ -2699,9 +2851,9 @@ public static function drawScrollMsgText():void {
 		titleText = msgScrollObjName;
 
 	// Erase title line and redraw.
-	titleGrid.writeConst(0, 0, msgScrollWidth + 3, 1, " ", 30);
+	titleGrid.writeConst(0, 0, msgScrollWidth + 3, 1, " ", sTextColor);
 	cx = int(msgScrollWidth/2 - titleText.length/2);
-	titleGrid.writeStr(2+cx, 0, titleText, 30);
+	titleGrid.writeStr(2+cx, 0, titleText, sTextColor);
 
 	// Draw grid surfaces.
 	titleGrid.drawSurfaces();
@@ -3267,6 +3419,9 @@ public static function dispatchInputMessage(msg:String):void
 		case "OPTIONSGUI":
 			dispatchOptionsGuiMenu(msg);
 			break;
+		case "OPTIONSEDITGUI":
+			dispatchOptionsEditGuiMenu(msg);
+			break;
 		case "CONSOLEGUI":
 			dispatchConsoleGuiMenu(msg);
 			break;
@@ -3351,13 +3506,13 @@ public static function dispatchDebugMenu(msg:String):void
 public static function setConfigType(cType:int):void {
 	configType = cType;
 
-	ZZTLoader.overridePropsGenModern["CONFIGTYPE"] = cType;
-	ZZTLoader.overridePropsGenClassic["CONFIGTYPE"] = cType;
+	ZZTProp.overridePropsGenModern["CONFIGTYPE"] = cType;
+	ZZTProp.overridePropsGenClassic["CONFIGTYPE"] = cType;
 
 	if (cType == 0)
-		ZZTLoader.overridePropsGeneral = ZZTLoader.overridePropsGenModern;
+		ZZTProp.overridePropsGeneral = ZZTProp.overridePropsGenModern;
 	else
-		ZZTLoader.overridePropsGeneral = ZZTLoader.overridePropsGenClassic;
+		ZZTProp.overridePropsGeneral = ZZTProp.overridePropsGenClassic;
 }
 
 // Dispatch an options-menu message
@@ -3368,17 +3523,17 @@ public static function dispatchOptionsGuiMenu(msg:String):void
 	switch (msg) {
 		case "OPT_QUIT":
 			// Update shared objects
-			saveSharedObj("CFGMODERN", ZZTLoader.overridePropsGenModern);
-			saveSharedObj("CFGCLASSIC", ZZTLoader.overridePropsGenClassic);
-			saveSharedObj("CFGZZTSPEC", ZZTLoader.overridePropsZZT);
-			saveSharedObj("CFGSZTSPEC", ZZTLoader.overridePropsSZT);
+			saveSharedObj("CFGMODERN", ZZTProp.overridePropsGenModern);
+			saveSharedObj("CFGCLASSIC", ZZTProp.overridePropsGenClassic);
+			saveSharedObj("CFGZZTSPEC", ZZTProp.overridePropsZZT);
+			saveSharedObj("CFGSZTSPEC", ZZTProp.overridePropsSZT);
 
 			// Return to main menu
 			mainMode = MODE_NORM;
 			popGui();
 			break;
 		case "OPT_RESET":
-			ZZTLoader.setOverridePropDefaults();
+			ZZTProp.setOverridePropDefaults();
 			setConfigType(configType);
 			drawGuiLabel("CONFIGTYPE", configTypeNames[configType]);
 			Toast("All properties reset to defaults.", 1.0);
@@ -3397,7 +3552,7 @@ public static function dispatchOptionsGuiMenu(msg:String):void
 				{
 					// Edit subset of general properties
 					for (k in jObj)
-						ZZTLoader.overridePropsGeneral[k] = jObj[k];
+						ZZTProp.overridePropsGeneral[k] = jObj[k];
 				}
 				else
 				{
@@ -3432,39 +3587,123 @@ public static function showOptionsForDict(msg:String):void {
 
 	switch (msg) {
 		case "OPT_GENERAL":
-			propDictToUpdate = ZZTLoader.overridePropsGeneral;
+			propDictToUpdate = ZZTProp.overridePropsGeneral;
 			oTitle = "General Options";
-			showPropTextView(MODE_ENTEROPTIONSPROP, oTitle,
+			showPropTextView(MODE_ENTEROPTIONSPROP, oTitle, 
 				parse.jsonToText(propDictToUpdate, true));
 			break;
 		case "OPT_ZZT":
-			propDictToUpdate = ZZTLoader.overridePropsZZT;
+			propDictToUpdate = ZZTProp.overridePropsZZT;
 			oTitle = "ZZT-specific Options";
-			showPropTextView(MODE_ENTEROPTIONSPROP, oTitle,
-				parse.jsonToText(propDictToUpdate, true));
+			showOptionsEditView(oTitle, msg.substr(4));
 			break;
 		case "OPT_SZT":
-			propDictToUpdate = ZZTLoader.overridePropsSZT;
+			propDictToUpdate = ZZTProp.overridePropsSZT;
 			oTitle = "SZT-specific Options";
-			showPropTextView(MODE_ENTEROPTIONSPROP, oTitle,
-				parse.jsonToText(propDictToUpdate, true));
+			showOptionsEditView(oTitle, msg.substr(4));
 			break;
 		default:
 			subsetStr = msg.substr(4);
-			if (ZZTLoader.propSubsets.hasOwnProperty(subsetStr))
+			if (ZZTProp.propSubsets.hasOwnProperty(subsetStr))
 			{
 				generalSubset = true;
-				for (var i:int = 0; i < ZZTLoader.propSubsets[subsetStr].length; i++) {
-					var s:String = ZZTLoader.propSubsets[subsetStr][i];
-					propDictToUpdate[s] = ZZTLoader.overridePropsGeneral[s];
+				for (var i:int = 0; i < ZZTProp.propSubsets[subsetStr].length; i++) {
+					var s:String = ZZTProp.propSubsets[subsetStr][i];
+					propDictToUpdate[s] = ZZTProp.overridePropsGeneral[s];
 				}
 
-				oTitle = ZZTLoader.propSubsetNames[subsetStr] + " Options";
-				showPropTextView(MODE_ENTEROPTIONSPROP, oTitle,
-					parse.jsonToText(propDictToUpdate, true));
+				oTitle = ZZTProp.propSubsetNames[subsetStr] + " Options";
+				showOptionsEditView(oTitle, subsetStr);
 			}
 			break;
 	}
+}
+
+// Show the descriptive options edit view.
+public static function showOptionsEditView(title:String, subsetName:String):void {
+	// Set up options edit GUI view
+	establishGui("OPTIONSEDITGUI");
+	mainMode = MODE_NORM;
+	drawGui();
+
+	// Draw labels
+	drawGuiLabel("CONFIGTYPE", configTypeNames[configType]);
+	drawGuiLabel("PROPTITLE", title);
+
+	// Draw property names
+	aSubsetName = subsetName;
+	var myPropNames:Array = ZZTProp.propSubsets[aSubsetName];
+	for (var i:int = 0; i < myPropNames.length; i++)
+		mg.writeStr(36-1, i + 5-1, myPropNames[i], 31);
+
+	// Draw cursor, values, and description
+	optCursor = 1;
+	dispatchOptionsEditGuiMenu("OPT_UP");
+}
+
+// Dispatch an options-menu message
+public static function dispatchOptionsEditGuiMenu(msg:String):void {
+	// Erase cursor
+	mg.writeStr(34-1, optCursor + 5-1, " ", 31);
+	var myPropNames:Array = ZZTProp.propSubsets[aSubsetName];
+	var curPropName:String = myPropNames[optCursor];
+
+	switch (msg) {
+		case "OPT_QUIT":
+			// Go back to OPTIONSGUI
+			establishGui("OPTIONSGUI");
+			mainMode = MODE_NORM;
+			drawGui();
+			drawGuiLabel("CONFIGTYPE", configTypeNames[configType]);
+			return;
+		case "OPT_UP":
+			if (--optCursor < 0)
+				optCursor = myPropNames.length - 1;
+			break;
+		case "OPT_DOWN":
+			if (++optCursor >= myPropNames.length)
+				optCursor = 0;
+			break;
+		case "OPT_EDIT":
+			// Bring up single-line property text box.
+			GuiLabels["PROPVALUE1"][0] = 61;
+			GuiLabels["PROPVALUE1"][1] = optCursor + 5;
+			textEntry("PROPVALUE1", propDictToUpdate[curPropName].toString(), 20, 14,
+				"OPT_TE_ACCEPT", "OPT_TE_REJECT");
+			return;
+		case "OPT_TE_REJECT":
+			// No update; just redraw.
+			break;
+		case "OPT_TE_ACCEPT":
+			// Update property.
+			if (propDictToUpdate[curPropName] is int)
+				propDictToUpdate[curPropName] = utils.int0(globals["$TEXTRESULT"]);
+			else
+				propDictToUpdate[curPropName] = globals["$TEXTRESULT"].toString();
+
+			if (generalSubset)
+				ZZTProp.overridePropsGeneral[curPropName] = propDictToUpdate[curPropName];
+			break;
+	}
+
+	// Write cursor
+	mg.setCell(34-1, optCursor + 5-1, 16, 29);
+
+	// Draw property values
+	for (var i:int = 0; i < myPropNames.length; i++)
+		mg.writeStr(61-1, i + 5-1,
+			propDictToUpdate[myPropNames[i]].toString(), 30);
+
+	// Draw description of current property
+	curPropName = myPropNames[optCursor];
+	var propStr:String = "";
+	if (ZZTProp.propDesc.hasOwnProperty(curPropName))
+		propStr = ZZTProp.propDesc[curPropName];
+
+	eraseGuiLabel("PROPDESC");
+	drawGuiLabel("PROPDESC", propStr);
+
+	interp.dispatchToMainLabel(msg);
 }
 
 // Dispatch an in-game console-menu message
@@ -3576,6 +3815,472 @@ public static function parseHighScores():void {
 	}
 	else
 		highScoresLoaded = false;
+}
+
+// Process action that comes from waiting on a load-complete event.
+public static function processLoadingSuccessModes():void {
+	var i:int;
+
+	switch (mainMode) {
+		case MODE_LOADMAIN:
+			// This is executed on successful load of main GUI file.
+			mainMode = MODE_SETUPMAIN;
+			origGuiStorage = parse.jsonObj;
+			resetGuis();
+			if (establishGui("DEBUGMENU"))
+			{
+				// GUI successfully established for main menu; set up and draw.
+				mainMode = MODE_NORM;
+				drawGui();
+
+				// Load main OOP definition file
+				parse.loadTextFile(GUIS_PREFIX + "zzt_objs.txt", MODE_LOADDEFAULTOOP);
+			}
+		break;
+		case MODE_LOADDEFAULTOOP:
+			// This is executed on successful load of default OOP definition file.
+			mainMode = MODE_SETUPOOP;
+			defsObj = parse.jsonObj;
+			if (establishOOP())
+			{
+				// OOP successfully compiled and definitions established.
+				mainMode = MODE_NORM;
+
+				// Establish that there are no "valid" PWADs at the start.
+				ZZTLoader.establishPWAD("n/a");
+
+				// Set up deployment from INI file
+				parse.loadTextFile(GUIS_PREFIX + "zzt_ini.txt", MODE_LOADINI);
+			}
+			else
+			{
+				// OOP compilation unsuccessful.
+				mainMode = MODE_NORM;
+			}
+		break;
+		case MODE_LOADINI:
+			// This is executed on successful load of INI file.
+			if (!establishINI())
+			{
+				mainMode = MODE_AUTOSTART;
+				parse.loadingSuccess = true;
+			}
+		break;
+		case MODE_LOADINDEXPATHS:
+			// Index path was loaded; add resulting paths to deployment.
+			if (!addIndexPaths())
+			{
+				mainMode = MODE_AUTOSTART;
+				parse.loadingSuccess = true;
+			}
+		break;
+		case MODE_AUTOSTART:
+			// Auto-start behavior obeys configuration params.
+			if (globalProps["DEP_STARTUPGUI"] != "DEBUGMENU")
+			{
+				// Replace startup GUI (experts only!)
+				establishGui(globalProps["DEP_STARTUPGUI"])
+				drawGui();
+				guiStack.pop();
+				guiStack.push(globalProps["DEP_STARTUPGUI"]);
+			}
+
+			// Initiate startup file, if there is one
+			if (globalProps["DEP_STARTUPFILE"] == "")
+			{
+				drawGuiLabel("CUSTOMTEXT", featuredWorldName);
+				mainMode = MODE_NORM;
+			}
+			else
+			{
+				featuredWorldFile = globalProps["DEP_STARTUPFILE"];
+				featuredWorldName = utils.namePartOfFile(featuredWorldFile);
+				drawGuiLabel("CUSTOMTEXT", featuredWorldName);
+				launchDeployedFile(featuredWorldFile);
+			}
+		break;
+
+		case MODE_PATCHLOADZZT:
+		case MODE_PATCHLOADSZT:
+		case MODE_PATCHLOADWAD:
+			if (!ZZTLoader.registerPWADFile(parse.fileData, parse.pwadKey))
+			{
+				// Failed to load--assume blank.
+				ZZTLoader.pwads[parse.pwadKey] = "";
+			}
+
+			mainMode = MODE_LOADZZT + (mainMode - MODE_PATCHLOADZZT);
+			parse.fileData = parse.origFileData;
+			parse.lastFileName = parse.origLastFileName;
+			parse.loadingSuccess = true;
+		break;
+
+		case MODE_NATIVELOADZZT:
+			// No file system; just ZZT file.
+			fileSystemType = FST_NONE;
+			mainMode = MODE_LOADZZT;
+		case MODE_LOADZZT:
+			mainMode = MODE_SETUPZZT;
+			if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
+			{
+				if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADZZT))
+					break;
+			}
+
+			highScoresLoaded = false;
+			resetGuis();
+			modeWhenBrowserClosed = MTRANS_NORM;
+			if (ZZTLoader.establishZZTFile(parse.fileData))
+			{
+				// Successful establishment; load title screen.
+				if (!inEditor)
+				{
+					// Apply scanline mod if set
+					if (mg.scanlineMode != globalProps["SCANLINES"])
+					{
+						mg.updateScanlineMode(globalProps["SCANLINES"]);
+						cellYDiv = 16;
+					}
+
+					establishGui("ZZTTITLE");
+					drawGui();
+					drawGuiLabel("WORLDNAME", globalProps["WORLDNAME"]);
+					drawPen("SPEEDCURSOR", 0, 8, globalProps["GAMESPEED"], 31, 31);
+				}
+
+				if (inEditor)
+				{
+					ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
+					globals["$PLAYERMODE"] = 5; // "Editor" mode
+					globalProps["OVERLAYSCROLL"] = 1;
+				}
+				else
+				{
+					ZZTLoader.switchBoard(0);
+					globals["$PLAYERMODE"] = 3; // "ZZT title screen" mode
+				}
+
+				globalProps["EVERPLAYED"] = 0;
+				globals["$ALLPUSH"] = 0;
+				globals["$PLAYERPAUSED"] = 0;
+				globals["$PAUSECYCLE"] = 0;
+				globals["$PASSAGEEMERGE"] = 0;
+				globals["$LASTSAVESECS"] = 0;
+				typeList[bearType].CHAR = 153;
+				typeList[bearType].COLOR = 6;
+				pMoveDir = -1;
+				pShootDir = -1;
+
+				if (inEditor)
+				{
+					mainMode = MODE_NORM;
+					editor.modFlag = false;
+					editor.boardWidth = boardProps["SIZEX"];
+					editor.boardHeight = boardProps["SIZEY"];
+					editor.editorCursorX = 1;
+					editor.editorCursorY = 1;
+					editor.forceCodeStrAll();
+					interp.dispatchToMainLabel("SETLINECHARS");
+					editor.updateEditorView(false);
+					activeObjs = false;
+				}
+				else
+				{
+					interp.dispatchToMainLabel("$ONWORLDLOAD");
+					dissolveViewport(MODE_NORM, 0.5, -1);
+					activeObjs = true;
+				}
+			}
+			else
+				mainMode = MODE_NORM;
+		break;
+		case MODE_NATIVELOADSZT:
+			// No file system; just SZT file.
+			fileSystemType = FST_NONE;
+			mainMode = MODE_LOADSZT;
+		case MODE_LOADSZT:
+			mainMode = MODE_SETUPSZT;
+			if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
+			{
+				if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADSZT))
+					break;
+			}
+
+			highScoresLoaded = false;
+			resetGuis();
+			modeWhenBrowserClosed = MTRANS_NORM;
+			if (ZZTLoader.establishZZTFile(parse.fileData))
+			{
+				// Successful establishment; load intro screen.
+				if (!inEditor)
+				{
+					// Apply scanline mod if set
+					if (mg.scanlineMode != globalProps["SCANLINES"])
+					{
+						mg.updateScanlineMode(globalProps["SCANLINES"]);
+						cellYDiv = 16;
+					}
+
+					if (globalProps["WORLDNAME"] == "FOREST")
+						establishGui("FOREST");
+					else if (globalProps["WORLDNAME"] == "PROVING")
+						establishGui("PROVING");
+					else if (globalProps["WORLDNAME"] == "MONSTER")
+						establishGui("MONSTER");
+					else
+						establishGui("CUSTOMSZT");
+
+					drawGui();
+					if (thisGuiName == "CUSTOMSZT")
+						drawGuiLabel("CUSTOMTEXT", globalProps["WORLDNAME"]);
+				}
+
+				if (inEditor)
+				{
+					ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
+					globals["$PLAYERMODE"] = 1; // Normal mode
+					globalProps["OVERLAYSCROLL"] = 1;
+				}
+				else
+				{
+					ZZTLoader.switchBoard(0);
+					globals["$PLAYERMODE"] = 4; // "SZT title screen" mode
+				}
+
+				activeObjs = false;
+
+				globalProps["EVERPLAYED"] = 0;
+				globals["$_SZTTITLEGUI"] = thisGuiName;
+				globals["$ALLPUSH"] = 0;
+				globals["$PLAYERPAUSED"] = 0;
+				globals["$PAUSECYCLE"] = 0;
+				globals["$PASSAGEEMERGE"] = 0;
+				globals["$LASTSAVESECS"] = 0;
+				typeList[bearType].CHAR = 235;
+				typeList[bearType].COLOR = 2;
+				pMoveDir = -1;
+				pShootDir = -1;
+
+				if (inEditor)
+				{
+					mainMode = MODE_NORM;
+					editor.modFlag = false;
+					editor.boardWidth = boardProps["SIZEX"];
+					editor.boardHeight = boardProps["SIZEY"];
+					editor.editorCursorX = 1;
+					editor.editorCursorY = 1;
+					editor.forceCodeStrAll();
+					interp.dispatchToMainLabel("SETLINECHARS");
+					SE.CameraX = 1;
+					SE.CameraY = 1;
+					editor.updateEditorView(false);
+				}
+				else
+					interp.dispatchToMainLabel("$ONWORLDLOAD");
+			}
+
+			mainMode = MODE_NORM;
+		break;
+		case MODE_LOADWAD:
+			mainMode = MODE_SETUPWAD;
+			if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
+			{
+				if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADWAD))
+					break;
+			}
+
+			highScoresLoaded = false;
+			resetGuis();
+			fileSystemType = FST_WAD;
+			modeWhenBrowserClosed = MTRANS_NORM;
+			oop.setOOPType();
+			loadedOOPType = -3;
+
+			if (ZZTLoader.establishWADFile(parse.fileData))
+			{
+				// Successful establishment; load current GUI and title screen.
+				if (!inEditor)
+				{
+					if (globalProps.hasOwnProperty("WADSTARTUPGUI"))
+						establishGui(globalProps["WADSTARTUPGUI"]);
+					else
+						establishGui("ZZTTITLE");
+
+					drawGui();
+					//drawGuiLabel("WORLDNAME", globalProps["WORLDNAME"]);
+					//drawPen("SPEEDCURSOR", 0, 8, globalProps["GAMESPEED"], 31, 31);
+				}
+
+				if (inEditor)
+					globals["$PLAYERMODE"] = 1; // Normal mode
+				else
+					globals["$PLAYERMODE"] = 3; // "ZZT title screen" mode
+
+				i = globalProps["BOARD"];
+				globalProps["BOARD"] = -1;
+				globalProps["EVERPLAYED"] = 0;
+				globals["$ALLPUSH"] = 0;
+				globals["$PLAYERPAUSED"] = 0;
+				globals["$PAUSECYCLE"] = 0;
+				globals["$PASSAGEEMERGE"] = 0;
+				globals["$LASTSAVESECS"] = 0;
+				pMoveDir = -1;
+				pShootDir = -1;
+
+				if (inEditor)
+					ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
+				else
+					ZZTLoader.switchBoard(0);
+
+				activeObjs = false;
+
+				// Even though we dispatch the world-load handler with the title
+				// screen loaded and many important properties and global variables
+				// initialized, nothing is actually displayed, and no paused/unpaused
+				// state decision is made.  This is because the WAD should define
+				// its own behavior for what it should do upon load (usually, a
+				// dissolve effect on the board).  The routine should also unpause
+				// the action if the title screen is meant to have action.
+
+				if (inEditor)
+				{
+					mainMode = MODE_NORM;
+					editor.modFlag = false;
+					editor.boardWidth = boardProps["SIZEX"];
+					editor.boardHeight = boardProps["SIZEY"];
+					editor.editorCursorX = 1;
+					editor.editorCursorY = 1;
+					editor.forceCodeStrAll();
+					interp.dispatchToMainLabel("SETLINECHARS");
+					globalProps["OVERLAYSCROLL"] = 1;
+					SE.CameraX = 1;
+					SE.CameraY = 1;
+					editor.updateEditorView(false);
+				}
+				else
+				{
+					interp.dispatchToMainLabel("$ONWORLDLOAD");
+					//dissolveViewport(MODE_NORM, 0.5, -1);
+				}
+			}
+			else
+				mainMode = MODE_NORM;
+		break;
+		case MODE_LOADTRANSFERWAD:
+			// Result of WAD transfer load has little effect on editor.
+			mainMode = MODE_SETUPWAD;
+			modeWhenBrowserClosed = MTRANS_NORM;
+			if (ZZTLoader.establishWADFile(parse.fileData, true))
+			{
+				globalProps["NUMBOARDS"] += 1;
+				editor.updateEditorView(false);
+				mainMode = MODE_NORM;
+				Toast("Transferred.", 0.25);
+			}
+			else
+				mainMode = MODE_NORM;
+		break;
+		case MODE_LOADZIP:
+			// Collect relevant game files from ZIP archive
+			fileSystemType = FST_ZIP;
+			modeWhenBrowserClosed = MTRANS_NORM;
+			arcFileNames = parse.zipData.getFileNamesMatchingExt(".ZZT");
+			arcFileNames = arcFileNames.concat(parse.zipData.getFileNamesMatchingExt(".SZT"));
+			arcFileNames = arcFileNames.concat(parse.zipData.getFileNamesMatchingExt(".WAD"));
+
+			if ((parse.zipData.numFiles == 1 && arcFileNames.length == 1) ||
+				(globalProps["DEP_AUTORUNZIP"] != 0 && arcFileNames.length == 1))
+			{
+				// Auto-load first game file in ZIP file.
+				parse.loadingSuccess = true;
+				parse.fileData = parse.zipData.getFileByName(arcFileNames[0]);
+				if (utils.endswith(arcFileNames[0], ".ZZT"))
+					mainMode = MODE_LOADZZT;
+				else if (utils.endswith(arcFileNames[0], ".SZT"))
+					mainMode = MODE_LOADSZT;
+				else
+					mainMode = MODE_LOADWAD;
+			}
+			else
+			{
+				// Show scroll containing ZIP file contents.
+				zipContentsScroll();
+			}
+		break;
+		case MODE_LOADFILEBROWSER:
+			displayFileBrowser(parse.loadingName);
+		break;
+		case MODE_LOADFILELINK:
+			launchFileLinkScroll(parse.loadingName);
+		break;
+		case MODE_LOADGUI:
+			editor.loadGuiFile();
+			mainMode = MODE_NORM;
+		break;
+		case MODE_LOADEXTRAGUI:
+			mainMode = MODE_NORM;
+			editor.uploadExtraGui();
+		break;
+		case MODE_LOADEXTRALUMP:
+			mainMode = MODE_NORM;
+			editor.uploadExtraLump();
+		break;
+		case MODE_LOADCHAREDITFILE:
+			mainMode = MODE_NORM;
+			editor.uploadCharEditFile();
+		break;
+		case MODE_LOADZZL:
+			mainMode = MODE_NORM;
+			editor.loadZZL();
+		break;
+		case MODE_SAVEGUI:
+			Toast("Saved.", 1.0);
+			mainMode = MODE_NORM;
+		break;
+		case MODE_SAVEWAD:
+			Toast("Saved.", 0.25);
+			mainMode = MODE_NORM;
+			if (editor.quitAfterSave)
+				editor.dispatchEditorMenu("ED_REALLYQUIT");
+		break;
+		case MODE_SAVELEGACY:
+			Toast("Saved.", 0.25);
+			mainMode = MODE_NORM;
+			if (editor.quitAfterSave)
+				editor.dispatchEditorMenu("ED_REALLYQUIT");
+		break;
+		case MODE_SAVEHLP:
+			Toast("Saved.", 1.0);
+			mainMode = MODE_NORM;
+		break;
+
+		case MODE_RESTOREWADFILE:
+			if (ZZTLoader.establishWADFile(parse.fileData))
+			{
+				// Successful establishment; load current GUI and board.
+				establishGui(globalProps["THISGUI"]);
+				drawGui();
+				i = globalProps["BOARD"];
+				globalProps["BOARD"] = -1;
+				ZZTLoader.switchBoard(i);
+				dissolveViewport(MODE_NORM, 0.5, -1);
+				interp.dispatchToMainLabel("$ONRESTOREGAME");
+			}
+			else
+				mainMode = MODE_NORM;
+		break;
+
+		case MODE_GETHIGHSCORES:
+			mainMode = parse.originalAction;
+			parseHighScores();
+			interp.dispatchToMainLabel(highScoresLoaded ? "$ONGETHS" : "$ONFAILGETHS");
+		break;
+		case MODE_POSTHIGHSCORE:
+			mainMode = parse.originalAction;
+			parseHighScores();
+			interp.dispatchToMainLabel(highScoresLoaded ? "$ONPOSTHS" : "$ONFAILPOSTHS");
+		break;
+	}
 }
 
 // Main timer tick iteration; called at 30 Hz
@@ -3722,6 +4427,7 @@ public static function mTick(event:TimerEvent):void
 			{
 				// Remove line(s).
 				undisplayToastMsg();
+				interp.marqueeText = "";
 			}
 			else
 			{
@@ -3753,467 +4459,7 @@ public static function mTick(event:TimerEvent):void
 	if (parse.loadingSuccess)
 	{
 		parse.loadingSuccess = false;
-
-		switch (mainMode) {
-			case MODE_LOADMAIN:
-				// This is executed on successful load of main GUI file.
-				mainMode = MODE_SETUPMAIN;
-				origGuiStorage = parse.jsonObj;
-				resetGuis();
-				if (establishGui("DEBUGMENU"))
-				{
-					// GUI successfully established for main menu; set up and draw.
-					mainMode = MODE_NORM;
-					drawGui();
-
-					// Load main OOP definition file
-					parse.loadTextFile(GUIS_PREFIX + "zzt_objs.txt", MODE_LOADDEFAULTOOP);
-				}
-			break;
-			case MODE_LOADDEFAULTOOP:
-				// This is executed on successful load of default OOP definition file.
-				mainMode = MODE_SETUPOOP;
-				defsObj = parse.jsonObj;
-				if (establishOOP())
-				{
-					// OOP successfully compiled and definitions established.
-					mainMode = MODE_NORM;
-
-					// Establish that there are no "valid" PWADs at the start.
-					ZZTLoader.establishPWAD("n/a");
-
-					// Set up deployment from INI file
-					parse.loadTextFile(GUIS_PREFIX + "zzt_ini.txt", MODE_LOADINI);
-				}
-				else
-				{
-					// OOP compilation unsuccessful.
-					mainMode = MODE_NORM;
-				}
-			break;
-			case MODE_LOADINI:
-				// This is executed on successful load of INI file.
-				if (!establishINI())
-				{
-					mainMode = MODE_AUTOSTART;
-					parse.loadingSuccess = true;
-				}
-			break;
-			case MODE_LOADINDEXPATHS:
-				// Index path was loaded; add resulting paths to deployment.
-				if (!addIndexPaths())
-				{
-					mainMode = MODE_AUTOSTART;
-					parse.loadingSuccess = true;
-				}
-			break;
-			case MODE_AUTOSTART:
-				// Auto-start behavior obeys configuration params.
-				if (globalProps["DEP_STARTUPGUI"] != "DEBUGMENU")
-				{
-					// Replace startup GUI (experts only!)
-					establishGui(globalProps["DEP_STARTUPGUI"])
-					drawGui();
-					guiStack.pop();
-					guiStack.push(globalProps["DEP_STARTUPGUI"]);
-				}
-
-				// Initiate startup file, if there is one
-				if (globalProps["DEP_STARTUPFILE"] == "")
-				{
-					drawGuiLabel("CUSTOMTEXT", featuredWorldName);
-					mainMode = MODE_NORM;
-				}
-				else
-				{
-					featuredWorldFile = globalProps["DEP_STARTUPFILE"];
-					featuredWorldName = utils.namePartOfFile(featuredWorldFile);
-					drawGuiLabel("CUSTOMTEXT", featuredWorldName);
-					launchDeployedFile(featuredWorldFile);
-				}
-			break;
-
-			case MODE_PATCHLOADZZT:
-			case MODE_PATCHLOADSZT:
-			case MODE_PATCHLOADWAD:
-				if (!ZZTLoader.registerPWADFile(parse.fileData, parse.pwadKey))
-				{
-					// Failed to load--assume blank.
-					ZZTLoader.pwads[parse.pwadKey] = "";
-				}
-
-				mainMode = MODE_LOADZZT + (mainMode - MODE_PATCHLOADZZT);
-				parse.fileData = parse.origFileData;
-				parse.lastFileName = parse.origLastFileName;
-				parse.loadingSuccess = true;
-			break;
-
-			case MODE_NATIVELOADZZT:
-				// No file system; just ZZT file.
-				fileSystemType = FST_NONE;
-				mainMode = MODE_LOADZZT;
-			case MODE_LOADZZT:
-				mainMode = MODE_SETUPZZT;
-				if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
-				{
-					if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADZZT))
-						break;
-				}
-
-				highScoresLoaded = false;
-				resetGuis();
-				modeWhenBrowserClosed = MTRANS_NORM;
-				if (ZZTLoader.establishZZTFile(parse.fileData))
-				{
-					// Successful establishment; load title screen.
-					if (!inEditor)
-					{
-						// Apply scanline mod if set
-						if (mg.scanlineMode != globalProps["SCANLINES"])
-						{
-							mg.updateScanlineMode(globalProps["SCANLINES"]);
-							cellYDiv = 16;
-						}
-
-						establishGui("ZZTTITLE");
-						drawGui();
-						drawGuiLabel("WORLDNAME", globalProps["WORLDNAME"]);
-						drawPen("SPEEDCURSOR", 0, 8, globalProps["GAMESPEED"], 31, 31);
-					}
-
-					if (inEditor)
-					{
-						ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
-						globals["$PLAYERMODE"] = 5; // "Editor" mode
-						globalProps["OVERLAYSCROLL"] = 1;
-					}
-					else
-					{
-						ZZTLoader.switchBoard(0);
-						globals["$PLAYERMODE"] = 3; // "ZZT title screen" mode
-					}
-
-					globalProps["EVERPLAYED"] = 0;
-					globals["$ALLPUSH"] = 0;
-					globals["$PLAYERPAUSED"] = 0;
-					globals["$PAUSECYCLE"] = 0;
-					globals["$PASSAGEEMERGE"] = 0;
-					globals["$LASTSAVESECS"] = 0;
-					typeList[bearType].CHAR = 153;
-					typeList[bearType].COLOR = 6;
-					pMoveDir = -1;
-					pShootDir = -1;
-
-					if (inEditor)
-					{
-						mainMode = MODE_NORM;
-						editor.modFlag = false;
-						editor.boardWidth = boardProps["SIZEX"];
-						editor.boardHeight = boardProps["SIZEY"];
-						editor.editorCursorX = 1;
-						editor.editorCursorY = 1;
-						editor.forceCodeStrAll();
-						interp.dispatchToMainLabel("SETLINECHARS");
-						editor.updateEditorView(false);
-						activeObjs = false;
-					}
-					else
-					{
-						interp.dispatchToMainLabel("$ONWORLDLOAD");
-						dissolveViewport(MODE_NORM, 0.5, -1);
-						activeObjs = true;
-					}
-				}
-				else
-					mainMode = MODE_NORM;
-			break;
-			case MODE_NATIVELOADSZT:
-				// No file system; just SZT file.
-				fileSystemType = FST_NONE;
-				mainMode = MODE_LOADSZT;
-			case MODE_LOADSZT:
-				mainMode = MODE_SETUPSZT;
-				if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
-				{
-					if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADSZT))
-						break;
-				}
-
-				highScoresLoaded = false;
-				resetGuis();
-				modeWhenBrowserClosed = MTRANS_NORM;
-				if (ZZTLoader.establishZZTFile(parse.fileData))
-				{
-					// Successful establishment; load intro screen.
-					if (!inEditor)
-					{
-						// Apply scanline mod if set
-						if (mg.scanlineMode != globalProps["SCANLINES"])
-						{
-							mg.updateScanlineMode(globalProps["SCANLINES"]);
-							cellYDiv = 16;
-						}
-
-						if (globalProps["WORLDNAME"] == "FOREST")
-							establishGui("FOREST");
-						else if (globalProps["WORLDNAME"] == "PROVING")
-							establishGui("PROVING");
-						else if (globalProps["WORLDNAME"] == "MONSTER")
-							establishGui("MONSTER");
-						else
-							establishGui("CUSTOMSZT");
-
-						drawGui();
-						if (thisGuiName == "CUSTOMSZT")
-							drawGuiLabel("CUSTOMTEXT", globalProps["WORLDNAME"]);
-					}
-
-					if (inEditor)
-					{
-						ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
-						globals["$PLAYERMODE"] = 1; // Normal mode
-						globalProps["OVERLAYSCROLL"] = 1;
-					}
-					else
-					{
-						ZZTLoader.switchBoard(0);
-						globals["$PLAYERMODE"] = 4; // "SZT title screen" mode
-					}
-
-					activeObjs = false;
-
-					globalProps["EVERPLAYED"] = 0;
-					globals["$_SZTTITLEGUI"] = thisGuiName;
-					globals["$ALLPUSH"] = 0;
-					globals["$PLAYERPAUSED"] = 0;
-					globals["$PAUSECYCLE"] = 0;
-					globals["$PASSAGEEMERGE"] = 0;
-					globals["$LASTSAVESECS"] = 0;
-					typeList[bearType].CHAR = 235;
-					typeList[bearType].COLOR = 2;
-					pMoveDir = -1;
-					pShootDir = -1;
-
-					if (inEditor)
-					{
-						mainMode = MODE_NORM;
-						editor.modFlag = false;
-						editor.boardWidth = boardProps["SIZEX"];
-						editor.boardHeight = boardProps["SIZEY"];
-						editor.editorCursorX = 1;
-						editor.editorCursorY = 1;
-						editor.forceCodeStrAll();
-						interp.dispatchToMainLabel("SETLINECHARS");
-						SE.CameraX = 1;
-						SE.CameraY = 1;
-						editor.updateEditorView(false);
-					}
-					else
-						interp.dispatchToMainLabel("$ONWORLDLOAD");
-				}
-
-				mainMode = MODE_NORM;
-			break;
-			case MODE_LOADWAD:
-				mainMode = MODE_SETUPWAD;
-				if (!ZZTLoader.pwadIsLoaded(pwadIndex, parse.lastFileName) && !inEditor)
-				{
-					if (parse.pwadLoad(pwadIndex, MODE_PATCHLOADWAD))
-						break;
-				}
-
-				highScoresLoaded = false;
-				resetGuis();
-				fileSystemType = FST_WAD;
-				modeWhenBrowserClosed = MTRANS_NORM;
-				oop.setOOPType();
-				loadedOOPType = -3;
-
-				if (ZZTLoader.establishWADFile(parse.fileData))
-				{
-					// Successful establishment; load current GUI and title screen.
-					if (!inEditor)
-					{
-						if (globalProps.hasOwnProperty("WADSTARTUPGUI"))
-							establishGui(globalProps["WADSTARTUPGUI"]);
-						else
-							establishGui("ZZTTITLE");
-
-						drawGui();
-						//drawGuiLabel("WORLDNAME", globalProps["WORLDNAME"]);
-						//drawPen("SPEEDCURSOR", 0, 8, globalProps["GAMESPEED"], 31, 31);
-					}
-
-					if (inEditor)
-						globals["$PLAYERMODE"] = 1; // Normal mode
-					else
-						globals["$PLAYERMODE"] = 3; // "ZZT title screen" mode
-
-					i = globalProps["BOARD"];
-					globalProps["BOARD"] = -1;
-					globalProps["EVERPLAYED"] = 0;
-					globals["$ALLPUSH"] = 0;
-					globals["$PLAYERPAUSED"] = 0;
-					globals["$PAUSECYCLE"] = 0;
-					globals["$PASSAGEEMERGE"] = 0;
-					globals["$LASTSAVESECS"] = 0;
-					pMoveDir = -1;
-					pShootDir = -1;
-
-					if (inEditor)
-						ZZTLoader.updateContFromBoard(0, ZZTLoader.boardData[0]);
-					else
-						ZZTLoader.switchBoard(0);
-
-					activeObjs = false;
-
-					// Even though we dispatch the world-load handler with the title
-					// screen loaded and many important properties and global variables
-					// initialized, nothing is actually displayed, and no paused/unpaused
-					// state decision is made.  This is because the WAD should define
-					// its own behavior for what it should do upon load (usually, a
-					// dissolve effect on the board).  The routine should also unpause
-					// the action if the title screen is meant to have action.
-
-					if (inEditor)
-					{
-						mainMode = MODE_NORM;
-						editor.modFlag = false;
-						editor.boardWidth = boardProps["SIZEX"];
-						editor.boardHeight = boardProps["SIZEY"];
-						editor.editorCursorX = 1;
-						editor.editorCursorY = 1;
-						editor.forceCodeStrAll();
-						interp.dispatchToMainLabel("SETLINECHARS");
-						globalProps["OVERLAYSCROLL"] = 1;
-						SE.CameraX = 1;
-						SE.CameraY = 1;
-						editor.updateEditorView(false);
-					}
-					else
-					{
-						interp.dispatchToMainLabel("$ONWORLDLOAD");
-						//dissolveViewport(MODE_NORM, 0.5, -1);
-					}
-				}
-				else
-					mainMode = MODE_NORM;
-			break;
-			case MODE_LOADTRANSFERWAD:
-				// Result of WAD transfer load has little effect on editor.
-				mainMode = MODE_SETUPWAD;
-				modeWhenBrowserClosed = MTRANS_NORM;
-				if (ZZTLoader.establishWADFile(parse.fileData, true))
-				{
-					globalProps["NUMBOARDS"] += 1;
-					editor.updateEditorView(false);
-					mainMode = MODE_NORM;
-					Toast("Transferred.", 0.25);
-				}
-				else
-					mainMode = MODE_NORM;
-			break;
-			case MODE_LOADZIP:
-				// Collect relevant game files from ZIP archive
-				fileSystemType = FST_ZIP;
-				modeWhenBrowserClosed = MTRANS_NORM;
-				arcFileNames = parse.zipData.getFileNamesMatchingExt(".ZZT");
-				arcFileNames = arcFileNames.concat(parse.zipData.getFileNamesMatchingExt(".SZT"));
-				arcFileNames = arcFileNames.concat(parse.zipData.getFileNamesMatchingExt(".WAD"));
-
-				if ((parse.zipData.numFiles == 1 && arcFileNames.length == 1) ||
-					(globalProps["DEP_AUTORUNZIP"] != 0 && arcFileNames.length == 1))
-				{
-					// Auto-load first game file in ZIP file.
-					parse.loadingSuccess = true;
-					parse.fileData = parse.zipData.getFileByName(arcFileNames[0]);
-					if (utils.endswith(arcFileNames[0], ".ZZT"))
-						mainMode = MODE_LOADZZT;
-					else if (utils.endswith(arcFileNames[0], ".SZT"))
-						mainMode = MODE_LOADSZT;
-					else
-						mainMode = MODE_LOADWAD;
-				}
-				else
-				{
-					// Show scroll containing ZIP file contents.
-					zipContentsScroll();
-				}
-			break;
-			case MODE_LOADFILEBROWSER:
-				displayFileBrowser(parse.loadingName);
-			break;
-			case MODE_LOADFILELINK:
-				launchFileLinkScroll(parse.loadingName);
-			break;
-			case MODE_LOADGUI:
-				editor.loadGuiFile();
-				mainMode = MODE_NORM;
-			break;
-			case MODE_LOADEXTRAGUI:
-				mainMode = MODE_NORM;
-				editor.uploadExtraGui();
-			break;
-			case MODE_LOADEXTRALUMP:
-				mainMode = MODE_NORM;
-				editor.uploadExtraLump();
-			break;
-			case MODE_LOADCHAREDITFILE:
-				mainMode = MODE_NORM;
-				editor.uploadCharEditFile();
-			break;
-			case MODE_LOADZZL:
-				mainMode = MODE_NORM;
-				editor.loadZZL();
-			break;
-			case MODE_SAVEGUI:
-				Toast("Saved.", 1.0);
-				mainMode = MODE_NORM;
-			break;
-			case MODE_SAVEWAD:
-				Toast("Saved.", 0.25);
-				mainMode = MODE_NORM;
-				if (editor.quitAfterSave)
-					editor.dispatchEditorMenu("ED_REALLYQUIT");
-			break;
-			case MODE_SAVELEGACY:
-				Toast("Saved.", 0.25);
-				mainMode = MODE_NORM;
-				if (editor.quitAfterSave)
-					editor.dispatchEditorMenu("ED_REALLYQUIT");
-			break;
-			case MODE_SAVEHLP:
-				Toast("Saved.", 1.0);
-				mainMode = MODE_NORM;
-			break;
-
-			case MODE_RESTOREWADFILE:
-				if (ZZTLoader.establishWADFile(parse.fileData))
-				{
-					// Successful establishment; load current GUI and board.
-					establishGui(globalProps["THISGUI"]);
-					drawGui();
-					i = globalProps["BOARD"];
-					globalProps["BOARD"] = -1;
-					ZZTLoader.switchBoard(i);
-					dissolveViewport(MODE_NORM, 0.5, -1);
-					interp.dispatchToMainLabel("$ONRESTOREGAME");
-				}
-				else
-					mainMode = MODE_NORM;
-			break;
-
-			case MODE_GETHIGHSCORES:
-				mainMode = parse.originalAction;
-				parseHighScores();
-				interp.dispatchToMainLabel(highScoresLoaded ? "$ONGETHS" : "$ONFAILGETHS");
-			break;
-			case MODE_POSTHIGHSCORE:
-				mainMode = parse.originalAction;
-				parseHighScores();
-				interp.dispatchToMainLabel(highScoresLoaded ? "$ONPOSTHS" : "$ONFAILPOSTHS");
-			break;
-		}
+		processLoadingSuccessModes();
 	}
 
 	// This is the main I/O handling mode.

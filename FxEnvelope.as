@@ -40,7 +40,7 @@ public static const T64_DURATION:Number = Q1_DURATION / 16.0;
 
 public static var octave_table:Array = [
 //  0          1      2     3     4     5     6     7
-	0.25,   0.25,  0.25,  0.5,  1.0,  2.0,  4.0,  8.0
+	0.0625,   0.125,  0.25,  0.5,  1.0,  2.0,  4.0,  8.0
 ];
 public static var frequency_table:Array = [
 //  B           C           C#          D           D#          E           F
@@ -524,7 +524,7 @@ public function writeSweepRegion(mixBuf:Vector.<Number>):Boolean {
 
 			// Select base sample from iterated frequency
 			curSoundInfo = allSoundInfo[Sounds.B7_X8];
-			for (var f:int = Sounds.E2_X1; f >= Sounds.B7_X8; f--)
+			for (var f:int = Sounds.G0_X1; f >= Sounds.B7_X8; f--)
 			{
 				if (freq < allSoundInfo[f][2])
 				{
@@ -803,6 +803,18 @@ public function prepNextNote(outBuf:Vector.<Number>):Boolean {
 			curDuration = T1_DURATION * tempoMultiplier;
 			tick64CountSize = 2;
 		break;
+		case "O":
+			if (queuePos + 2 <= queue.length)
+			{
+				// Set octave.
+				idx = intFrom2D(queue, queuePos, -1);
+				if (idx >= 0 && idx <= 7)
+				{
+					curOctave = idx;
+					queuePos += 2;
+				}
+			}
+		break;
 		case "%":
 			if (queuePos + 5 <= queue.length)
 			{
@@ -872,7 +884,7 @@ public function letteredNote(idx:int):void {
 	// Select base sample from frequency
 	freq = frequency_table[idx] * octave_table[curOctave];
 	curSoundInfo = allSoundInfo[Sounds.B7_X8];
-	for (var f:int = Sounds.E2_X1; f >= Sounds.B7_X8; f--)
+	for (var f:int = Sounds.G0_X1; f >= Sounds.B7_X8; f--)
 	{
 		if (freq < allSoundInfo[f][2])
 		{

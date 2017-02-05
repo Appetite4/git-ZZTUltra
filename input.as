@@ -139,10 +139,11 @@ public static function keyDownHandler(theCode:uint, charCode:uint,
 				// Normal dispatch
 				zzt.dispatchInputMessage(guiKeyMappingArray[theCode]);
 			}
-			else if (editor.typingTextInGuiEditor && theCode != 16)
+			else if (editor.typingTextInGuiEditor && theCode != 16 && theCode != 17)
 			{
 				// Type key to GUI editor.
 				editor.writeKeyToGuiEditor(charCode & 255);
+				editor.lastChar = 32;
 			}
 			break;
 

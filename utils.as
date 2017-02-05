@@ -50,6 +50,13 @@ public static function dir4skewed():int
 	return i;
 }
 
+public static function orderInts(a:int, b:int):Array {
+	if (a < b)
+		return [a, b];
+	else
+		return [b, a];
+}
+
 public static var curXSize:int;
 public static var curYSize:int;
 public static var curAllSize:int;
@@ -159,6 +166,12 @@ public static function inrange(n:int, lowest:int, highest:int):Boolean
 	return true;
 }
 public static function clipval(n:Number, lowest:Number, highest:Number):Number
+{
+	if (n < lowest) n = lowest;
+	if (n > highest) n = highest;
+	return n;
+}
+public static function clipintval(n:int, lowest:int, highest:int):int
 {
 	if (n < lowest) n = lowest;
 	if (n > highest) n = highest;
@@ -355,6 +368,14 @@ public static function startswith(fName:String, fStart:String):Boolean {
 
 	return Boolean(
 		fName.substr(0, fStart.length).toUpperCase() == fStart.toUpperCase());
+}
+
+public static function strReps(s:String, reps:int):String {
+	var totalString:String = "";
+	while (reps-- > 0)
+		totalString += s;
+
+	return totalString;
 }
 
 public static function getSortedKeys(o:Object):Array {

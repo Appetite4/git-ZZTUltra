@@ -43,6 +43,7 @@ public static const SM_EXTRAGUI:int = 13;
 public static const SM_EXTRAWAD:int = 14;
 public static const SM_CHAREDITLOAD:int = 15;
 public static const SM_CHAREDITSAVE:int = 16;
+public static const SM_GUITEXT:int = 17;
 
 public static const BSA_SWITCHBOARD:int = 0;
 public static const BSA_SETBOARDPROP:int = 1;
@@ -121,6 +122,8 @@ public static var anchorX:int = -1;
 public static var anchorY:int = -1;
 public static var clipX1:int = 0;
 public static var clipY1:int = 0;
+public static var guiClipWidth:int = 0;
+public static var guiClipHeight:int = 0;
 public static var invertGPts:Boolean = false;
 public static var gradientShape:int = 0;
 public static var gradientDither:Number = 0.0;
@@ -132,6 +135,7 @@ public static var selBuffer:Array = [];
 public static var gradBuffer:Array = [];
 public static var fillBuffer:Array = [];
 public static var clipBuffer:Array = [];
+public static var guiClipBuffer:Array = [];
 public static var objLibraryBuffer:Array = [];
 public static var tempStatProps:Object = null;
 
@@ -245,7 +249,7 @@ public static function drawColorBand(labelStr:String):void
 {
 	// Assumed that color band is just below label
 	var guiLabelInfo:Array = zzt.GuiLabels[labelStr];
-	var gx:int = (zzt.GuiLocX-1) + int(guiLabelInfo[0]) - 1;
+	var gx:int = (zzt.GuiLocX-1) + int(guiLabelInfo[0]) - 1 + 2;
 	var gy:int = (zzt.GuiLocY-1) + int(guiLabelInfo[1]) + 1 - 1;
 
 	// Write color band
@@ -339,6 +343,7 @@ public static function dispatchEditGuiMenu(msg:String):void
 				zzt.mainMode = zzt.MODE_NORM;
 				zzt.mg.writeConst(0, 0, zzt.CHARS_WIDTH, zzt.CHARS_HEIGHT, " ", 31);
 				zzt.drawGui();
+				drawFlag = 0;
 				typingTextInGuiEditor = true;
 				writeGuiTextEdit();
 				writeGuiTextEditLabels();
@@ -363,24 +368,96 @@ public static function dispatchEditGuiTextMenu(msg:String):void
 			guiTextEditCursor -= 1;
 			if (guiTextEditCursor < 0)
 				guiTextEditCursor = editWidth * editHeight - 1;
-			writeGuiTextEdit();
+			anchorX = guiTextEditCursor;
+
+			if (drawFlag)
+				writeKeyToGuiEditor(lastChar, false);
+			else
+				writeGuiTextEdit();
 			break;
 		case "EVENT_RIGHT":
 			guiTextEditCursor += 1;
 			if (guiTextEditCursor >= editWidth * editHeight)
 				guiTextEditCursor = 0;
-			writeGuiTextEdit();
+			anchorX = guiTextEditCursor;
+
+			if (drawFlag)
+				writeKeyToGuiEditor(lastChar, false);
+			else
+				writeGuiTextEdit();
 			break;
 		case "EVENT_UP":
 			guiTextEditCursor -= editWidth;
 			if (guiTextEditCursor < 0)
 				guiTextEditCursor = 0;
-			writeGuiTextEdit();
+			anchorX = guiTextEditCursor;
+
+			if (drawFlag)
+				writeKeyToGuiEditor(lastChar, false);
+			else
+				writeGuiTextEdit();
 			break;
 		case "EVENT_DOWN":
 			guiTextEditCursor += editWidth;
 			if (guiTextEditCursor >= editWidth * editHeight)
 				guiTextEditCursor = editWidth * editHeight - 1;
+			anchorX = guiTextEditCursor;
+
+			if (drawFlag)
+				writeKeyToGuiEditor(lastChar, false);
+			else
+				writeGuiTextEdit();
+			break;
+		case "EVENT_SELLEFT":
+			guiTextEditCursor -= 1;
+			if (guiTextEditCursor < 0)
+				guiTextEditCursor = editWidth * editHeight - 1;
+			writeGuiTextEdit(true);
+			break;
+		case "EVENT_SELRIGHT":
+			guiTextEditCursor += 1;
+			if (guiTextEditCursor >= editWidth * editHeight)
+				guiTextEditCursor = 0;
+			writeGuiTextEdit(true);
+			break;
+		case "EVENT_SELUP":
+			guiTextEditCursor -= editWidth;
+			if (guiTextEditCursor < 0)
+				guiTextEditCursor = 0;
+			writeGuiTextEdit(true);
+			break;
+		case "EVENT_SELDOWN":
+			guiTextEditCursor += editWidth;
+			if (guiTextEditCursor >= editWidth * editHeight)
+				guiTextEditCursor = editWidth * editHeight - 1;
+			writeGuiTextEdit(true);
+			break;
+
+		case "EVENT_COLORDIALOG":
+			oldFgColorCursor = fgColorCursor;
+			oldBgColorCursor = bgColorCursor;
+			scrollMode = SM_GUITEXT;
+			zzt.inEditor = true;
+			zzt.mainMode = zzt.MODE_COLORSEL;
+			zzt.establishGui("ED_COLORS");
+			for (j = 1; j <= 8; j++) {
+				zzt.GuiTextLines[j] = String.fromCharCode(179);
+				for (i = 1; i <= 32; i++) {
+					zzt.GuiTextLines[j] += String.fromCharCode(254);
+				}
+				zzt.GuiTextLines[j] += String.fromCharCode(179);
+			}
+			zzt.drawGui();
+			drawKolorCursor(true);
+			break;
+
+		case "EVENT_COPY":
+			copyGuiTextRange();
+			anchorX = guiTextEditCursor;
+			writeGuiTextEdit();
+			break;
+		case "EVENT_PASTE":
+			pasteGuiText();
 			writeGuiTextEdit();
 			break;
 
@@ -402,6 +479,13 @@ public static function dispatchEditGuiTextMenu(msg:String):void
 				altCharCursor = 255;
 
 			lastChar = altCharCursor;
+			writeGuiTextEditLabels();
+			break;
+		case "EVENT_TOGGLEDRAW":
+			drawFlag = drawFlag ^ 1;
+			if (drawFlag)
+				writeKeyToGuiEditor(lastChar, false);
+
 			writeGuiTextEditLabels();
 			break;
 		case "EVENT_PLOTLAST":
@@ -481,9 +565,9 @@ public static function insertNewGuiLabelAt(propContainer:String, labelStr:String
 
 public static function writeColorCursors():void
 {
-	var fgColorStr:String = "";
-	var bgColorStr:String = "";
-	var blinkStr:String = "No ";
+	var fgColorStr:String = "  ";
+	var bgColorStr:String = "  ";
+	var blinkStr:String = "  No ";
 
 	for (var i:int = 0; i < 8; i++)
 	{
@@ -502,28 +586,52 @@ public static function writeColorCursors():void
 			bgColorStr += " ";
 	}
 	if (blinkFlag)
-		blinkStr = "Yes";
+		blinkStr = "  Yes";
 
-	zzt.drawGuiLabel("COLORCURSOR1", fgColorStr);
-	zzt.drawGuiLabel("COLORCURSOR2", bgColorStr);
-	zzt.drawGuiLabel("BLINKLABEL", blinkStr);
+	var doOffset:Boolean = Boolean(zzt.thisGuiName == "EDITGUITEXT");
+	drawGuiLabelSmart("COLORCURSOR1", fgColorStr, doOffset);
+	drawGuiLabelSmart("COLORCURSOR2", bgColorStr, doOffset);
+	drawGuiLabelSmart("BLINKLABEL", blinkStr, doOffset);
 	drawColorBand("COLORCURSOR1");
 }
 
 public static function writeGuiTextEditLabels():void
 {
-	zzt.drawGuiLabel("PLOTLAST", "Tab:  Last char");
-	zzt.drawGuiLabel("ALTCHAR", "Numpad +/-:  Char " + String.fromCharCode(altCharCursor));
-	zzt.drawGuiLabel("PICKUPCHAR", "Enter:  Get char");
-	zzt.drawGuiLabel("PICKUPALL", "Shift+Enter: Get all");
-	zzt.drawGuiLabel("SETLABEL", "F3:  Set GUI label");
-	zzt.drawGuiLabel("SETMOUSEINPUT", "F4:  Set mouse label");
-	zzt.drawGuiLabel("RETURNTOEDITGUI", "Esc:  Back to menu");
+	drawGuiLabelSmart("TOGGLEDRAW", "Tab:  Draw mode " + (drawFlag ? "ON " : "OFF"));
+	drawGuiLabelSmart("PLOTLAST", "Space:  Plot last");
+	drawGuiLabelSmart("ALTCHAR", "Numpad +/-:  Char " + String.fromCharCode(altCharCursor));
+	drawGuiLabelSmart("PICKUPCHAR", "Enter:  Get char");
+	drawGuiLabelSmart("PICKUPALL", "Shift+Enter: Get all");
+	drawGuiLabelSmart("SETLABEL", "F3:  Set GUI label");
+	drawGuiLabelSmart("SETMOUSEINPUT", "F4:  Set mouse label");
+	drawGuiLabelSmart("RETURNTOEDITGUI", "Esc:  Back to menu");
+	drawGuiLabelSmart("COLORDIALOG", "Ctrl+K:  Color dlg.");
+	drawGuiLabelSmart("RANGE", "Shift+Arrow:  Select");
+	drawGuiLabelSmart("COPY", "Ctrl+C:  Copy");
+	drawGuiLabelSmart("PASTE", "Ctrl+V:  Paste");
 	writeColorCursors();
 }
 
-public static function writeGuiTextEdit():void
+public static function drawGuiLabelSmart(lbl:String, val:String, doOffset:Boolean=true):void
 {
+	// Kick label to left side of display if cursor would intrude on label area.
+	if (doOffset)
+	{
+		var gx:int = guiTextEditCursor % editWidth;
+		gx = (gx >= 60) ? -79 : -19;
+		zzt.GuiLabels[lbl][0] = gx;
+	}
+
+	zzt.drawGuiLabel(lbl, val);
+}
+
+public static function writeGuiTextEdit(showSel:Boolean=false):void
+{
+	var gx:Array = utils.orderInts(
+		guiTextEditCursor % editWidth, anchorX % editWidth);
+	var gy:Array = utils.orderInts(
+		int(guiTextEditCursor / editWidth), int(anchorX / editWidth));
+
 	var gtc:int = 0;
 	for (var j:int = 0; j < editHeight; j++)
 	{
@@ -532,14 +640,19 @@ public static function writeGuiTextEdit():void
 			var color:int = editorAttrs[j * zzt.MAX_WIDTH + i];
 			if (guiTextEditCursor == gtc)
 				color = color ^ 127;
-			gtc++;
+			else if (showSel)
+			{
+				if (i >= gx[0] && i <= gx[1] && j >= gy[0] && j <= gy[1])
+					color = color ^ 127;
+			}
 
+			gtc++;
 			zzt.mg.setCell(i, j, editorChars[j * zzt.MAX_WIDTH + i], color);
 		}
 	}
 }
 
-public static function writeKeyToGuiEditor(c:uint):void
+public static function writeKeyToGuiEditor(c:uint, doAdvance:Boolean=true):void
 {
 	lastChar = int(c);
 	var gx:int = guiTextEditCursor % editWidth;
@@ -548,11 +661,48 @@ public static function writeKeyToGuiEditor(c:uint):void
 	editorChars[gy * zzt.MAX_WIDTH + gx] = lastChar;
 	editorAttrs[gy * zzt.MAX_WIDTH + gx] = color;
 
-	guiTextEditCursor += 1;
-	if (guiTextEditCursor >= editWidth * editHeight)
-		guiTextEditCursor = 0;
+	if (doAdvance)
+	{
+		guiTextEditCursor += 1;
+		if (guiTextEditCursor >= editWidth * editHeight)
+			guiTextEditCursor = 0;
+	}
 
 	writeGuiTextEdit();
+	modFlag = true;
+}
+
+public static function copyGuiTextRange():void {
+	var gx:Array = utils.orderInts(
+		guiTextEditCursor % editWidth, anchorX % editWidth);
+	var gy:Array = utils.orderInts(
+		int(guiTextEditCursor / editWidth), int(anchorX / editWidth));
+
+	guiClipWidth = gx[1] - gx[0] + 1;
+	guiClipHeight = gy[1] - gy[0] + 1;
+	guiClipBuffer = new Array(guiClipHeight * guiClipWidth * 2);
+
+	var gtc:int = 0;
+	for (var y:int = gy[0]; y <= gy[1]; y++) {
+		for (var x:int = gx[0]; x <= gx[1]; x++) {
+			guiClipBuffer[gtc++] = editorChars[y * zzt.MAX_WIDTH + x];
+			guiClipBuffer[gtc++] = editorAttrs[y * zzt.MAX_WIDTH + x];
+		}
+	}
+}
+
+public static function pasteGuiText():void {
+	var gx:int = guiTextEditCursor % editWidth;
+	var gy:int = int(guiTextEditCursor / editWidth);
+
+	var gtc:int = 0;
+	for (var y:int = 0; y < guiClipHeight; y++) {
+		for (var x:int = 0; x < guiClipWidth; x++) {
+			editorChars[(y + gy) * zzt.MAX_WIDTH + (x + gx)] = guiClipBuffer[gtc++];
+			editorAttrs[(y + gy) * zzt.MAX_WIDTH + (x + gx)] = guiClipBuffer[gtc++];
+		}
+	}
+
 	modFlag = true;
 }
 
@@ -825,8 +975,8 @@ public static function newWorldSetup():void {
 	zzt.globalProps["KEY15"] = 0;
 
 	// Sounds
-	for (var k:String in ZZTLoader.defaultSoundFx)
-		zzt.soundFx[k] = ZZTLoader.defaultSoundFx[k];
+	for (var k:String in ZZTProp.defaultSoundFx)
+		zzt.soundFx[k] = ZZTProp.defaultSoundFx[k];
 
 	// Board properties
 	boardWidth = 60;
@@ -1666,6 +1816,18 @@ public static function dispatchEditorMenu(msg:String, handleSpecGui:Boolean=true
 				relSE = SE.getStatElemAt(editorCursorX, editorCursorY);
 				relSE.UNDERCOLOR = fgColorCursor + (bgColorCursor * 16) + (blinkFlag ? 128 : 0);
 				showTileScroll();
+			}
+			else if (scrollMode == SM_GUITEXT)
+			{
+				zzt.inEditor = false;
+				zzt.establishGui("EDITGUITEXT");
+				zzt.mg.writeConst(0, 0, zzt.CHARS_WIDTH, zzt.CHARS_HEIGHT, " ", 31);
+				zzt.drawGui();
+				writeColorCursors();
+				writeGuiTextEdit();
+				writeGuiTextEditLabels();
+				zzt.mainMode = zzt.MODE_NORM;
+				scrollMode = 0;
 			}
 			else
 			{
@@ -5756,9 +5918,9 @@ public static function doSave(sType:int):Boolean {
 			var FOLLOWER:int = se.extra.hasOwnProperty("FOLLOWER") ? se.extra["FOLLOWER"] : 0;
 			var LEADER:int = se.extra.hasOwnProperty("LEADER") ? se.extra["LEADER"] : 0;
 			if (FOLLOWER >= 65536 || FOLLOWER < 0)
-				FOLLOWER = 0;
+				FOLLOWER = 65535;
 			if (LEADER >= 65536 || LEADER < 0)
-				LEADER = 0;
+				LEADER = 65535;
 
 			if (eInfo.NUMBER == 36)
 			{

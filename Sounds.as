@@ -40,16 +40,20 @@ public static const C3_X1:int = 11;
 public static const G2_X1:int = 12;
 public static const E2_X1:int = 13;
 public static const C2_X1:int = 14;
-public static const PERC_0:int = 15;
-public static const PERC_1:int = 16;
-public static const PERC_2:int = 17;
+public static const G1_X1:int = 15;
+public static const C1_X1:int = 16;
+public static const G0_X1:int = 17;
+public static const C0_X1:int = 18;
+public static const PERC_0:int = 19;
+public static const PERC_1:int = 20;
+public static const PERC_2:int = 21;
 public static const PERC_3:int = 0;
-public static const PERC_4:int = 19;
-public static const PERC_5:int = 20;
-public static const PERC_6:int = 21;
-public static const PERC_7:int = 22;
-public static const PERC_8:int = 23;
-public static const PERC_9:int = 24;
+public static const PERC_4:int = 23;
+public static const PERC_5:int = 24;
+public static const PERC_6:int = 25;
+public static const PERC_7:int = 26;
+public static const PERC_8:int = 27;
+public static const PERC_9:int = 28;
 
 // Music constants
 public static const BGM_SILENCE:int = 0;
@@ -73,6 +77,10 @@ public static var sound_info:Array = [
 	[ false, G2_X1, 98.00, 1, null, null ],
 	[ false, E2_X1, 82.276119402985, 1, null, null ],
 	[ false, C2_X1, 65.43026706231454, 1, null, null ],
+	[ false, G1_X1, 49.00, 1, null, null ],
+	[ false, C1_X1, 32.71513353115727, 1, null, null ],
+	[ false, G0_X1, 24.5, 1, null, null ],
+	[ false, C0_X1, 16.357566765578635, 1, null, null ],
 	[ false, PERC_0, 0.0, 1, null, null ],
 	[ false, PERC_1, 0.0, 1, null, null ],
 	[ false, PERC_2, 0.0, 1, null, null ],
@@ -140,6 +148,10 @@ public static function initAllSounds(builtInSoundFx=null, builtInGlobalProps=nul
 	initSound(G2_X1, new g2_98_00());
 	initSound(E2_X1, new e2_82_41());
 	initSound(C2_X1, new c2_65_41());
+	initSound(G1_X1, new g1_49_00());
+	initSound(C1_X1, new c1_32_72());
+	initSound(G0_X1, new g0_24_50());
+	initSound(C0_X1, new c0_16_36());
 	initSound(PERC_0, new perc_0());
 	initSound(PERC_1, new perc_1());
 	initSound(PERC_2, new perc_2());

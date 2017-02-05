@@ -1,4 +1,4 @@
-﻿//interp.as:  The program's OOP interpretation functions.
+﻿// interp.as:  The program's OOP interpretation functions.
 
 package {
 public class interp {
@@ -8,6 +8,8 @@ import flash.text.*;
 import flash.utils.ByteArray;
 
 // Constants
+
+// SE flags
 public static const FL_IDLE:int = 1;
 public static const FL_LOCKED:int = 2;
 public static const FL_PENDINGDEAD:int = 4;
@@ -15,18 +17,21 @@ public static const FL_DEAD:int = 8;
 public static const FL_GHOST:int = 16;
 public static const FL_NOSTAT:int = 32;
 public static const FL_DISPATCH:int = 64;
+public static const FL_UNDERLAYER:int = 128;
 
+// Type placement modes
 public static const CF_RETAINSE:int = 1;
 public static const CF_RETAINCOLOR:int = 2;
 public static const CF_REMOVEIFBLOCKING:int = 4;
 public static const CF_GHOSTED:int = 8;
+public static const CF_UNDERLAYER:int = 16;
 
+// Text target locations
 public static const TEXT_TARGET_NORM:int = 0;
 public static const TEXT_TARGET_GUI:int = 1;
 public static const TEXT_TARGET_GRID:int = 2;
 
 public static const SCRIPT_DEADLOCK_THRESHOLD:int = 65536;
-public static const OBJ_COM_THRESHOLD:int = 32;
 
 public static var step2Dir4:Array = [ 2, 3, 3, 2, -1, 0, 1, 1, 0 ];
 public static var step2Dir8:Array = [ 5, 6, 7, 4, -1, 0, 3, 2, 1 ];
@@ -59,6 +64,7 @@ public static var playSyncIdleSE:SE = null;
 // Clone info
 public static var cloneType:int = 0;
 public static var cloneColor:int = 0;
+public static var lastKindColor:int = 0;
 
 // Interpreter state
 public static var code:Array;
@@ -67,6 +73,7 @@ public static var onPropPos:int = -1;
 public static var onMousePos:int = -1;
 public static var scriptDeadlockCount:int = 0;
 public static var objComCount:int = 32;
+public static var objComThreshold:int = 32;
 public static var dispatchStack:Array = [];
 public static var classicSet:int = 0;
 public static var restoredFirst:Boolean = false;
@@ -82,6 +89,7 @@ public static var noRegion:Array = [ [ 0, 0 ] , [ 0, 0 ] ];
 public static var allRegion:Array = [ [ 1, 1 ] , [ 1, 1 ] ];
 public static var litRegion:Array = [ [ 1000000, 1000000 ] , [ -1, -1 ] ];
 public static var testRegion:Array;
+public static var forceRegionLiteral:Boolean = false;
 public static var noMask:Array = [ [ 0 ] ];
 public static var modGuiLabel:Array = null;
 public static var genericSeq:Array = null;
@@ -130,6 +138,9 @@ public static var doDispText:int = 0;
 public static var textTarget:int = 0;
 public static var textDestType:int = 73; // _TEXTBLUE
 public static var textDestLabel:String = "NONE";
+public static var marqueeSize:int = 60;
+public static var marqueeDir:int = -1;
+public static var marqueeText:String = "";
 
 // Special
 public static var captchaSrcArray:Array = [];
@@ -235,10 +246,20 @@ public static function atan2FromSteps(stepX:int, stepY:int, resolution:int):int 
 	return int(((index + (arc >> 1)) & 255) / arc);
 }
 
+// Show error message
 public static function errorMsg(str:String):void {
 	thisSE.FLAGS |= FL_IDLE;
 	oop.errorMsg(str);
 	trace(str);
+}
+
+// Assign a new unique identifier if needed
+public static function assignID(se:SE):void {
+	if (se)
+	{
+		if (se.myID <= 0)
+			se.myID = ++nextObjPtrNum;
+	}
 }
 
 // This is called at various times to dispatch a message from anywhere,
@@ -420,6 +441,27 @@ public static function execElementCode(eInfo:ElementInfo, forSE:SE=null):Boolean
 			thisSE.delay = 10;
 	}
 
+	// Check under-layer flag.
+	if (thisSE.FLAGS & FL_UNDERLAYER)
+	{
+		// Special "under-layer" status forces a status element to remain
+		// ghosted until the square at which it resides has no status element
+		// present already.
+		if (SE.getStatElemAt(thisSE.X, thisSE.Y) == null)
+		{
+			// Unghost.
+			thisSE.FLAGS &= ~(FL_GHOST + FL_UNDERLAYER);
+
+			// Update square.
+			thisSE.moveSelfSquare(thisSE.X, thisSE.Y, false);
+			SE.setColor(thisSE.X, thisSE.Y, thisSE.extra["!!ULCOLOR"], false);
+			delete thisSE.extra["!!ULCOLOR"];
+			thisSE.displaySelfSquare();
+		}
+
+		return true;
+	}
+
 	// Check delay.  Note that we update the delay counter even if the idle flag
 	// is set, because WALKBEHAVIOR iterates only as frequently as the cycle would
 	// also iterate for the main iteration.
@@ -446,7 +488,8 @@ public static function execElementCode(eInfo:ElementInfo, forSE:SE=null):Boolean
 	{
 		// Custom code (OBJECT, SCROLL).  Subject to limited number of #commands.
 		code = codeBlocks[thisSE.extra["CODEID"]];
-		objComCount = OBJ_COM_THRESHOLD;
+		objComThreshold = zzt.globalProps["OBJMAGICNUMBER"];
+		objComCount = objComThreshold;
 	}
 	else
 	{
@@ -537,6 +580,7 @@ public static function processCommand(cByte:int):Boolean {
 		case oop.CMD_TEXTLINKFILE:
 		case oop.CMD_DYNTEXT:
 		case oop.CMD_DYNLINK:
+		case oop.CMD_SCROLLSTR:
 			if (!processText(cByte))
 				return false;
 		break;
@@ -576,7 +620,7 @@ public static function processCommand(cByte:int):Boolean {
 			}
 		break;
 		case oop.CMD_TEXTTOGRID:
-			str = getString();
+			str = regionGetExpr(); // Region name
 			textDestType = intGetExpr();
 			if (str == "NONE")
 				textTarget = TEXT_TARGET_NORM;
@@ -586,11 +630,15 @@ public static function processCommand(cByte:int):Boolean {
 				textDestLabel = str;
 			}
 		break;
+		case oop.CMD_SCROLLCOLOR:
+			zzt.setScrollColors(intGetExpr(), intGetExpr(), intGetExpr(),
+				intGetExpr(), intGetExpr(), intGetExpr(), intGetExpr());
+		break;
 
 		// Movement
 		case oop.CMD_GO:
 			turns--;
-			objComCount -= OBJ_COM_THRESHOLD;
+			objComCount -= objComThreshold;
 			pos = thisSE.IP - 1;
 			d = getDir();
 			if (d != -1)
@@ -656,7 +704,7 @@ public static function processCommand(cByte:int):Boolean {
 		break;
 		case oop.CMD_FORCEGO:
 			turns--;
-			objComCount -= OBJ_COM_THRESHOLD;
+			objComCount -= objComThreshold;
 			d = getDir();
 			if (d != -1)
 			{
@@ -677,7 +725,7 @@ public static function processCommand(cByte:int):Boolean {
 		break;
 		case oop.CMD_TRY:
 			turns--;
-			objComCount -= OBJ_COM_THRESHOLD;
+			objComCount -= objComThreshold;
 			d = getDir();
 			thisSE.IP++;
 			pos2 = getInt(); // Jump-over location
@@ -707,7 +755,7 @@ public static function processCommand(cByte:int):Boolean {
 						// By default, OBJECTs can't do anything special when
 						// interacting with transporters.
 						turns++;
-						objComCount += OBJ_COM_THRESHOLD - 1;
+						objComCount += objComThreshold - 1;
 					}
 					else if (assessPushability(tx, ty, d, false))
 					{
@@ -724,7 +772,7 @@ public static function processCommand(cByte:int):Boolean {
 							// Unable to squash this time because we don't
 							// allow point-blank squashing.
 							turns++;
-							objComCount += OBJ_COM_THRESHOLD - 1;
+							objComCount += objComThreshold - 1;
 						}
 						else
 						{
@@ -737,21 +785,21 @@ public static function processCommand(cByte:int):Boolean {
 					else
 					{
 						// We can't move; execute alternate command.
-						objComCount += OBJ_COM_THRESHOLD - 1;
+						objComCount += objComThreshold - 1;
 						turns++;
 					}
 				}
 				else
 				{
 					// We can't move; execute alternate command.
-					objComCount += OBJ_COM_THRESHOLD - 1;
+					objComCount += objComThreshold - 1;
 					turns++;
 				}
 			}
 		break;
 		case oop.CMD_TRYSIMPLE:
 			turns--;
-			objComCount -= OBJ_COM_THRESHOLD;
+			objComCount -= objComThreshold;
 			d = getDir();
 			if (d != -1)
 			{
@@ -877,7 +925,7 @@ public static function processCommand(cByte:int):Boolean {
 		case oop.CMD_EXTRATURNS:
 			pos = intGetExpr();
 			turns += pos;
-			objComCount += pos * OBJ_COM_THRESHOLD;
+			objComCount += pos * objComThreshold;
 		break;
 		case oop.CMD_SUSPENDDISPLAY:
 			SE.suspendDisp = intGetExpr();
@@ -1004,8 +1052,7 @@ public static function processCommand(cByte:int):Boolean {
 			if (relSE)
 			{
 				playerSE = relSE;
-				if (playerSE.myID <= 0)
-					playerSE.myID = ++nextObjPtrNum;
+				assignID(playerSE);
 				zzt.globals["$PLAYER"] = playerSE.myID;
 			}
 			else
@@ -1163,12 +1210,37 @@ public static function processCommand(cByte:int):Boolean {
 
 		// Type mods and placement
 		case oop.CMD_SPAWN:
+			d = getInt();
 			getCoords(coords1);
 			kind1 = getKind();
 			if (!validCoords(coords1))
 				errorMsg("#SPAWN:  Invalid coordinates");
+			else if (d == oop.DIR_UNDER)
+			{
+				// Start element in under-layer at current position.
+				relSE = createKind(coords1[0], coords1[1], kind1,
+					CF_RETAINCOLOR | CF_GHOSTED | CF_UNDERLAYER);
+				if (relSE)
+				{
+					relSE.FLAGS |= FL_UNDERLAYER;
+					relSE.extra["!!ULCOLOR"] = lastKindColor;
+					assignID(relSE);
+				}
+			}
 			else
 			{
+				if (d == oop.DIR_OVER)
+				{
+					// Automatically move existing SE to under-layer.
+					relSE = SE.getStatElemAt(coords1[0], coords1[1]);
+					if (relSE)
+					{
+						relSE.extra["!!ULCOLOR"] = SE.getColor(coords1[0], coords1[1]);
+						relSE.eraseSelfSquare();
+						relSE.FLAGS |= FL_GHOST | FL_UNDERLAYER;
+					}
+				}
+
 				relSE = createKind(coords1[0], coords1[1], kind1, CF_RETAINCOLOR);
 				if (relSE)
 					relSE.displaySelfSquare();
@@ -1186,8 +1258,7 @@ public static function processCommand(cByte:int):Boolean {
 				relSE = createKind(coords1[0], coords1[1], kind1, CF_RETAINCOLOR | CF_GHOSTED);
 				if (relSE)
 				{
-					if (relSE.myID <= 0)
-						relSE.myID = ++nextObjPtrNum;
+					assignID(relSE);
 					setVariableFromRef(d, str, relSE.myID);
 				}
 			}
@@ -1196,36 +1267,67 @@ public static function processCommand(cByte:int):Boolean {
 			objComCount--;
 			d = getDir();
 			kind1 = getKind();
-			tx = thisSE.X + getStepXFromDir4(d);
-			ty = thisSE.Y + getStepYFromDir4(d);
-			if (zzt.globalProps["NOPUTBOTTOMROW"])
+
+			if (d == oop.DIR_UNDER)
 			{
-				if (!validXYM1(tx, ty) || d == -1)
-					break;
-			}
-			else if (!validXY(tx, ty) || d == -1)
-			{
+				// Start element in under-layer at current position.
+				relSE = createKind(thisSE.X, thisSE.Y, kind1,
+					CF_RETAINCOLOR | CF_GHOSTED | CF_UNDERLAYER);
+				if (relSE)
+				{
+					relSE.FLAGS |= FL_UNDERLAYER;
+					relSE.extra["!!ULCOLOR"] = lastKindColor;
+					assignID(relSE);
+				}
 				break;
 			}
 
-			pos = SE.getType(tx, ty);
-			if (typeList[pos].BlockObject && typeList[pos].Pushable != 0)
+			if (d == oop.DIR_OVER)
 			{
-				if (assessPushability(tx, ty, d, false))
+				// Automatically move self to under-layer.
+				if ((thisSE.FLAGS & FL_GHOST) == 0)
 				{
-					// Push without squashing.
-					pushItems(tx, ty, d, false);
+					thisSE.extra["!!ULCOLOR"] = SE.getColor(thisSE.X, thisSE.Y);
+					thisSE.eraseSelfSquare();
+					thisSE.FLAGS |= FL_GHOST | FL_UNDERLAYER;
 				}
-				else if (assessPushability(tx, ty, d, true))
+
+				tx = thisSE.X;
+				ty = thisSE.Y;
+			}
+			else
+			{
+				tx = thisSE.X + getStepXFromDir4(d);
+				ty = thisSE.Y + getStepYFromDir4(d);
+				if (zzt.globalProps["NOPUTBOTTOMROW"])
 				{
-					// Push with squashing, unless point-blank would be squashed.
-					if (wouldSquashX != tx || wouldSquashY != ty)
-						pushItems(tx, ty, d, true);
+					if (!validXYM1(tx, ty) || d == -1)
+						break;
 				}
-				else if (typeList[pos].NUMBER == 4)
+				else if (!validXY(tx, ty) || d == -1)
 				{
-					// Can't overwrite player.
 					break;
+				}
+	
+				pos = SE.getType(tx, ty);
+				if (typeList[pos].BlockObject && typeList[pos].Pushable != 0)
+				{
+					if (assessPushability(tx, ty, d, false))
+					{
+						// Push without squashing.
+						pushItems(tx, ty, d, false);
+					}
+					else if (assessPushability(tx, ty, d, true))
+					{
+						// Push with squashing, unless point-blank would be squashed.
+						if (wouldSquashX != tx || wouldSquashY != ty)
+							pushItems(tx, ty, d, true);
+					}
+					else if (typeList[pos].NUMBER == 4)
+					{
+						// Can't overwrite player.
+						break;
+					}
 				}
 			}
 
@@ -1353,16 +1455,28 @@ public static function processCommand(cByte:int):Boolean {
 			processChange(noRegion);
 		break;
 		case oop.CMD_CHANGEREGION:
-			str = getString(); // Region name
+			str = regionGetExpr(); // Region name
 			processChange(getRegion(str));
+		break;
+		case oop.CMD_KILLPOS:
+			getCoords(coords1);
+			relSE = SE.getStatElemAt(coords1[0], coords1[1]);
+			if (relSE)
+			{
+				killSE(coords1[0], coords1[1]);
+				SE.displaySquare(coords1[0], coords1[1]);
+			}
 		break;
 		case oop.CMD_SETPOS:
 			pos = intGetExpr(); // Object pointer
+			pos2 = getInt(); // DIR_UNDER
+
 			getCoords(coords1);
 			relSE2 = SE.getStatElem(pos);
 
 			if (!relSE2)
 			{
+				// No valid source; can still destroy destination.
 				if (validCoords(coords1, true))
 				{
 					relSE = SE.getStatElemAt(coords1[0], coords1[1]);
@@ -1381,12 +1495,40 @@ public static function processCommand(cByte:int):Boolean {
 			}
 			else if (validCoords(coords1, true))
 			{
+				// Valid source; not ghosted.
 				relSE = SE.getStatElemAt(coords1[0], coords1[1]);
 				if (relSE != relSE2)
-					killSE(coords1[0], coords1[1]);
-
-				// Move status element
-				relSE2.moveSelfSquare(coords1[0], coords1[1]);
+				{
+					if (pos2 == oop.DIR_UNDER)
+					{
+						// Go to under-layer.
+						lastKindColor = SE.getColor(relSE2.X, relSE2.Y);
+						relSE2.eraseSelfSquare();
+						relSE2.FLAGS |= FL_GHOST | FL_UNDERLAYER;
+						relSE2.X = coords1[0];
+						relSE2.Y = coords1[1];
+						relSE2.extra["!!ULCOLOR"] = lastKindColor;
+					}
+					else if (pos2 == oop.DIR_OVER)
+					{
+						// Move destination to under-layer, then move source.
+						relSE.extra["!!ULCOLOR"] = SE.getColor(coords1[0], coords1[1]);
+						relSE.eraseSelfSquare();
+						relSE.FLAGS |= FL_GHOST | FL_UNDERLAYER;
+						relSE2.moveSelfSquare(coords1[0], coords1[1]);
+					}
+					else
+					{
+						// Kill destination, then move source.
+						killSE(coords1[0], coords1[1]);
+						relSE2.moveSelfSquare(coords1[0], coords1[1]);
+					}
+				}
+				else
+				{
+					// Move status element
+					relSE2.moveSelfSquare(coords1[0], coords1[1]);
+				}
 			}
 		break;
 
@@ -1456,8 +1598,7 @@ public static function processCommand(cByte:int):Boolean {
 				setVariableFromRef(d, str, -1);
 			else
 			{
-				if (relSE.myID <= 0)
-					relSE.myID = ++nextObjPtrNum;
+				assignID(relSE);
 				setVariableFromRef(d, str, relSE.myID);
 			}
 		break;
@@ -1536,14 +1677,14 @@ public static function processCommand(cByte:int):Boolean {
 			}
 		break;
 		case oop.CMD_SETREGION:
-			str = getString(); // Region name
+			str = regionGetExpr(); // Region name
 			getCoords(coords1);
 			getCoords(coords2);
 			if (validCoords(coords1) && validCoords(coords2))
 				zzt.regions[str] = [ [ coords1[0], coords1[1] ], [ coords2[0], coords2[1] ] ];
 		break;
 		case oop.CMD_CLEARREGION:
-			str = getString(); // Region name
+			str = regionGetExpr(); // Region name
 			if (zzt.regions.hasOwnProperty(str))
 				delete zzt.regions[str];
 		break;
@@ -1721,6 +1862,11 @@ public static function processCommand(cByte:int):Boolean {
 				pos = getInt();
 				str = "KEY" + pos;
 			}
+			else if (pos == oop.INV_EXTRA)
+			{
+				str = getString();
+				zzt.globals["$EXTRAINVNAME"] = str;
+			}
 			else if (pos == oop.INV_NONE)
 			{
 				str = "###";
@@ -1745,6 +1891,11 @@ public static function processCommand(cByte:int):Boolean {
 			{
 				pos = getInt();
 				str = "KEY" + pos;
+			}
+			else if (pos == oop.INV_EXTRA)
+			{
+				str = getString();
+				zzt.globals["$EXTRAINVNAME"] = str;
 			}
 			else if (pos == oop.INV_NONE)
 			{
@@ -1955,14 +2106,14 @@ public static function processCommand(cByte:int):Boolean {
 					}
 				break;
 				case oop.FLAG_ANYIN:
-					str = getString();
+					str = regionGetExpr(); // Region name
 					kind1 = getKind();
 					pos = 0;
 					if (checkTypeWithinRegion(getRegion(str), kind1, kwargPos))
 						pos = 1;
 				break;
 				case oop.FLAG_SELFIN:
-					str = getString();
+					str = regionGetExpr(); // Region name
 					testRegion = getRegion(str);
 					pos = 0;
 					if (thisSE.X >= testRegion[0][0] && thisSE.Y >= testRegion[0][1] &&
@@ -2036,12 +2187,12 @@ public static function processCommand(cByte:int):Boolean {
 			thisSE.FLAGS &= ~FL_DISPATCH;
 			turns = 1;
 			if (thisSE.extra.hasOwnProperty("CODEID"))
-				objComCount = OBJ_COM_THRESHOLD;
+				objComCount = objComThreshold;
 		break;
 		case oop.CMD_FOREACH:
 			str = getExprRef();
 			d = lastExprType;
-			if (cueForEach(str, d, getString()) == -1)
+			if (cueForEach(str, d, regionGetExpr()) == -1)
 			{
 				// Short-circuit jump past FORNEXT if loop totally empty
 				thisSE.IP = findLabel(code, ":#PASTFORNEXT", thisSE.IP, 3);
@@ -2064,7 +2215,7 @@ public static function processCommand(cByte:int):Boolean {
 			d = lastExprType;
 			str2 = getExprRef();
 			pos = lastExprType;
-			if (cueForRegion(str, d, str2, pos, getString()) == -1)
+			if (cueForRegion(str, d, str2, pos, regionGetExpr()) == -1)
 			{
 				// Short-circuit jump past FORNEXT if loop totally empty
 				thisSE.IP = findLabel(code, ":#PASTFORNEXT", thisSE.IP, 3);
@@ -2088,10 +2239,7 @@ public static function processCommand(cByte:int):Boolean {
 			}
 
 			// Play retention
-			if (zzt.globalProps["PLAYRETENTION"])
-				str = "Z01@K40:0.3:" + str;
-			else
-				str = "Z00P99@K40:0:" + str;
+			str = markupPlayString(str);
 
 			// Only play if sound is registered as on
 			if (zzt.globalProps["SOUNDOFF"] != 1)
@@ -2182,18 +2330,7 @@ public static function processCommand(cByte:int):Boolean {
 		break;
 		case oop.CMD_CAMERAFOCUS:
 			getCoords(coords1);
-			SE.CameraX = int(coords1[0] - (SE.vpWidth >> 1));
-			SE.CameraY = int(coords1[1] - (SE.vpHeight >> 1));
-			if (SE.CameraX > SE.gridWidth - SE.vpWidth + 1)
-				SE.CameraX = SE.gridWidth - SE.vpWidth + 1;
-			if (SE.CameraY > SE.gridHeight - SE.vpHeight + 1)
-				SE.CameraY = SE.gridHeight - SE.vpHeight + 1;
-			if (SE.CameraX < 1)
-				SE.CameraX = 1;
-			if (SE.CameraY < 1)
-				SE.CameraY = 1;
-			zzt.boardProps["CAMERAX"] = SE.CameraX;
-			zzt.boardProps["CAMERAY"] = SE.CameraY;
+			cameraAdjust(coords1);
 		break;
 
 		case oop.CMD_PUSHARRAY:
@@ -2344,7 +2481,7 @@ public static function processCommand(cByte:int):Boolean {
 		case oop.CMD_GROUPGO:
 			// Update of position will wait until path is free.
 			turns--;
-			objComCount -= OBJ_COM_THRESHOLD;
+			objComCount -= objComThreshold;
 			pos = thisSE.IP - 1;
 			getCoords(coords1);
 			exprRefSrc1 = getExpr() as Array;
@@ -2390,7 +2527,7 @@ public static function processCommand(cByte:int):Boolean {
 						// Yes
 						tryEntireMove(0);
 						turns--;
-						objComCount -= OBJ_COM_THRESHOLD;
+						objComCount -= objComThreshold;
 						thisSE.IP = pos2; // Jump over
 					}
 				}
@@ -2402,7 +2539,7 @@ public static function processCommand(cByte:int):Boolean {
 						// Yes
 						tryEntireMove(0);
 						turns--;
-						objComCount -= OBJ_COM_THRESHOLD;
+						objComCount -= objComThreshold;
 						thisSE.IP = pos2; // Jump over
 					}
 				}
@@ -2692,7 +2829,6 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		case oop.CMD_BIND:
 		case oop.CMD_SEND:
 		case oop.CMD_DISPATCH:
-		case oop.CMD_CLEARREGION:
 		case oop.CMD_ZAP:
 		case oop.CMD_RESTORE:
 		case oop.CMD_PLAY:
@@ -2732,6 +2868,7 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		case oop.CMD_RESTOREGAME:
 		case oop.CMD_DUMPSE:
 		case oop.CMD_SETPLAYER:
+		case oop.CMD_CLEARREGION:
 			pos = ignoreExpr(codeBlock, pos);
 		break;
 
@@ -2761,6 +2898,20 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		case oop.CMD_DYNTEXTVAR:
 			pos = ignoreText(codeBlock, pos, cByte);
 		break;
+		case oop.CMD_SCROLLSTR:
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos++;
+		break;
+		case oop.CMD_SCROLLCOLOR:
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+			pos = ignoreExpr(codeBlock, pos);
+		break;
 
 		case oop.CMD_GO:
 		case oop.CMD_FORCEGO:
@@ -2783,6 +2934,7 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		break;
 
 		case oop.CMD_SPAWN:
+			pos++;
 			pos = ignoreCoords(codeBlock, pos);
 			pos = ignoreKind(codeBlock, pos);
 		break;
@@ -2805,11 +2957,15 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 			pos = ignoreKind(codeBlock, pos);
 		break;
 		case oop.CMD_CHANGEREGION:
-			pos++;
+			pos = ignoreExpr(codeBlock, pos);
 			pos = ignoreKind(codeBlock, pos);
 			pos = ignoreKind(codeBlock, pos);
 		break;
 		case oop.CMD_SETPOS:
+			pos = ignoreExpr(codeBlock, pos);
+			pos++;
+			pos = ignoreCoords(codeBlock, pos);
+		break;
 		case oop.CMD_TYPEAT:
 		case oop.CMD_COLORAT:
 		case oop.CMD_OBJAT:
@@ -2839,18 +2995,19 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		case oop.CMD_LIGHTEN:
 		case oop.CMD_DARKEN:
 		case oop.CMD_DUMPSEAT:
+		case oop.CMD_KILLPOS:
 			pos = ignoreCoords(codeBlock, pos);
 		break;
 		case oop.CMD_TEXTTOGUI:
 			pos++;
 		break;
 		case oop.CMD_TEXTTOGRID:
-			pos++;
+			pos = ignoreExpr(codeBlock, pos);
 			pos = ignoreExpr(codeBlock, pos);
 		break;
 
 		case oop.CMD_SETREGION:
-			pos++;
+			pos = ignoreExpr(codeBlock, pos);
 			pos = ignoreCoords(codeBlock, pos);
 			pos = ignoreCoords(codeBlock, pos);
 		break;
@@ -2914,13 +3071,23 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		break;
 
 		case oop.CMD_GIVE:
-			if (codeBlock[pos++] == oop.INV_KEY)
+			if (codeBlock[pos] == oop.INV_KEY)
+				pos += 2;
+			else if (codeBlock[pos] == oop.INV_EXTRA)
+				pos += 2;
+			else
 				pos++;
+
 			pos = ignoreExpr(codeBlock, pos);
 		break;
 		case oop.CMD_TAKE:
-			if (codeBlock[pos++] == oop.INV_KEY)
+			if (codeBlock[pos] == oop.INV_KEY)
+				pos += 2;
+			else if (codeBlock[pos] == oop.INV_EXTRA)
+				pos += 2;
+			else
 				pos++;
+
 			pos = ignoreExpr(codeBlock, pos);
 			//pos = ignoreCommand(codeBlock, pos);
 		break;
@@ -2961,11 +3128,11 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 					pos = ignoreKind(codeBlock, pos);
 				break;
 				case oop.FLAG_ANYIN:
-					pos++;
+					pos = ignoreExpr(codeBlock, pos);
 					pos = ignoreKind(codeBlock, pos);
 				break;
 				case oop.FLAG_SELFIN:
-					pos++;
+					pos = ignoreExpr(codeBlock, pos);
 				break;
 				case oop.FLAG_TYPEIS:
 					pos = ignoreCoords(codeBlock, pos);
@@ -2990,7 +3157,7 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 
 		case oop.CMD_FOREACH:
 			pos = ignoreExpr(codeBlock, pos);
-			pos++;
+			pos = ignoreExpr(codeBlock, pos);
 		break;
 		case oop.CMD_FORMASK:
 			pos = ignoreExpr(codeBlock, pos);
@@ -3001,7 +3168,7 @@ public static function ignoreCommand(codeBlock:Array, pos:int):int {
 		case oop.CMD_FORREGION:
 			pos = ignoreExpr(codeBlock, pos);
 			pos = ignoreExpr(codeBlock, pos);
-			pos++;
+			pos = ignoreExpr(codeBlock, pos);
 		break;
 		case oop.CMD_FORNEXT:
 		break;
@@ -3290,7 +3457,6 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 
 			case oop.CMD_NAME:
 			case oop.CMD_BIND:
-			case oop.CMD_CLEARREGION:
 			case oop.CMD_ZAP:
 			case oop.CMD_RESTORE:
 			case oop.CMD_PLAY:
@@ -3300,6 +3466,7 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			case oop.CMD_FALSEJUMP:
 				pos++;
 			break;
+
 			case oop.CMD_NOP:
 			case oop.CMD_PAUSE:
 			case oop.CMD_UNPAUSE:
@@ -3328,6 +3495,7 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			case oop.CMD_RESTOREGAME:
 			case oop.CMD_DUMPSE:
 			case oop.CMD_SETPLAYER:
+			case oop.CMD_CLEARREGION:
 				pos = ignoreExpr(codeBlock, pos);
 			break;
 			case oop.CMD_SCROLLTOVISUALS:
@@ -3353,6 +3521,20 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			case oop.CMD_DYNTEXTVAR:
 				pos = ignoreText(codeBlock, pos, cByte);
 			break;
+			case oop.CMD_SCROLLSTR:
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos++;
+			break;
+			case oop.CMD_SCROLLCOLOR:
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+				pos = ignoreExpr(codeBlock, pos);
+			break;
 
 			case oop.CMD_GO:
 			case oop.CMD_FORCEGO:
@@ -3375,6 +3557,7 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			break;
 
 			case oop.CMD_SPAWN:
+				pos++;
 				pos = ignoreCoords(codeBlock, pos);
 				pos = ignoreKind(codeBlock, pos);
 			break;
@@ -3397,11 +3580,15 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 				pos = ignoreKind(codeBlock, pos);
 			break;
 			case oop.CMD_CHANGEREGION:
-				pos++;
+				pos = ignoreExpr(codeBlock, pos);
 				pos = ignoreKind(codeBlock, pos);
 				pos = ignoreKind(codeBlock, pos);
 			break;
 			case oop.CMD_SETPOS:
+				pos = ignoreExpr(codeBlock, pos);
+				pos++;
+				pos = ignoreCoords(codeBlock, pos);
+			break;
 			case oop.CMD_TYPEAT:
 			case oop.CMD_COLORAT:
 			case oop.CMD_OBJAT:
@@ -3431,17 +3618,18 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			case oop.CMD_LIGHTEN:
 			case oop.CMD_DARKEN:
 			case oop.CMD_DUMPSEAT:
+			case oop.CMD_KILLPOS:
 				pos = ignoreCoords(codeBlock, pos);
 			break;
 			case oop.CMD_TEXTTOGUI:
 				pos++;
 			break;
 			case oop.CMD_TEXTTOGRID:
-				pos++;
+				pos = ignoreExpr(codeBlock, pos);
 				pos = ignoreExpr(codeBlock, pos);
 			break;
 			case oop.CMD_SETREGION:
-				pos++;
+				pos = ignoreExpr(codeBlock, pos);
 				pos = ignoreCoords(codeBlock, pos);
 				pos = ignoreCoords(codeBlock, pos);
 			break;
@@ -3505,13 +3693,23 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			break;
 
 			case oop.CMD_GIVE:
-				if (codeBlock[pos++] == oop.INV_KEY)
+				if (codeBlock[pos] == oop.INV_KEY)
+					pos += 2;
+				else if (codeBlock[pos] == oop.INV_EXTRA)
+					pos += 2;
+				else
 					pos++;
+
 				pos = ignoreExpr(codeBlock, pos);
 			break;
 			case oop.CMD_TAKE:
-				if (codeBlock[pos++] == oop.INV_KEY)
+				if (codeBlock[pos] == oop.INV_KEY)
+					pos += 2;
+				else if (codeBlock[pos] == oop.INV_EXTRA)
+					pos += 2;
+				else
 					pos++;
+
 				pos = ignoreExpr(codeBlock, pos);
 				//pos = ignoreCommand(codeBlock, pos);
 			break;
@@ -3552,11 +3750,11 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 						pos = ignoreKind(codeBlock, pos);
 					break;
 					case oop.FLAG_ANYIN:
-						pos++;
+						pos = ignoreExpr(codeBlock, pos);
 						pos = ignoreKind(codeBlock, pos);
 					break;
 					case oop.FLAG_SELFIN:
-						pos++;
+						pos = ignoreExpr(codeBlock, pos);
 					break;
 					case oop.FLAG_TYPEIS:
 						pos = ignoreCoords(codeBlock, pos);
@@ -3581,7 +3779,7 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 
 			case oop.CMD_FOREACH:
 				pos = ignoreExpr(codeBlock, pos);
-				pos++;
+				pos = ignoreExpr(codeBlock, pos);
 			break;
 			case oop.CMD_FORMASK:
 				pos = ignoreExpr(codeBlock, pos);
@@ -3592,7 +3790,7 @@ public static function findLabel(codeBlock:Array, mLabel:String, pos:int=0, filt
 			case oop.CMD_FORREGION:
 				pos = ignoreExpr(codeBlock, pos);
 				pos = ignoreExpr(codeBlock, pos);
-				pos++;
+				pos = ignoreExpr(codeBlock, pos);
 			break;
 			case oop.CMD_FORNEXT:
 				if (filter == 3)
@@ -3875,6 +4073,8 @@ public static function processText(cByte:int):Boolean {
 	}
 
 	var lStr:String = "";
+	var pos:int = 0;
+	var pos2:int = 0;
 
 	switch (cByte) {
 		case oop.CMD_TEXT:
@@ -3894,16 +4094,6 @@ public static function processText(cByte:int):Boolean {
 		break;
 		case oop.CMD_DYNTEXT:
 			lStr = getString();
-			/*if (lStr.charAt(0) == "$")
-			{
-				lStr = dynFormatString(lStr.substr(1));
-				zzt.addMsgLine("$", lStr);
-			}
-			else
-			{
-				lStr = dynFormatString(lStr);
-				zzt.addMsgLine("", lStr);
-			}*/
 			lStr = dynFormatString(lStr);
 			zzt.addMsgLine("", lStr);
 		break;
@@ -3912,6 +4102,46 @@ public static function processText(cByte:int):Boolean {
 			zzt.addMsgLine(lStr, dynFormatString(getString()));
 		break;
 		case oop.CMD_DUMPSE:
+		break;
+		case oop.CMD_SCROLLSTR:
+			pos = intGetExpr();
+			pos2 = intGetExpr();
+			lStr = dynFormatString(getString());
+
+			if (pos > 0)
+				marqueeSize = pos;
+
+			if (pos2 == 0)
+			{
+				// Queue text; don't scroll.
+				if (lStr.length > 0)
+					marqueeText = lStr;
+				else
+					marqueeText = utils.strReps(" ", marqueeSize);
+			}
+			else if (pos2 < 0)
+			{
+				// Scroll left.
+				pos2 = -pos2;
+				marqueeDir = -1;
+				marqueeText += lStr + utils.strReps(" ", pos2 - lStr.length);
+				marqueeText = marqueeText.substr(pos2);
+			}
+			else // pos2 > 0
+			{
+				// Scroll right.
+				marqueeDir = 1;
+				marqueeText =
+					utils.strReps(" ", pos2 - lStr.length) + lStr + marqueeText;
+				marqueeText = marqueeText.substr(0, marqueeText.length - pos2);
+			}
+
+			// Set output.
+			if (marqueeDir == -1)
+				zzt.addMsgLine("", marqueeText.substr(0, marqueeSize));
+			else
+				zzt.addMsgLine("",
+					marqueeText.substr(marqueeText.length - marqueeSize, marqueeSize));
 		break;
 	}
 
@@ -4241,6 +4471,10 @@ public static function getDir():int {
 			case oop.DIR_MAJOR:
 			case oop.DIR_MINOR:
 				qualifier = cByte;
+			break;
+			case oop.DIR_UNDER:
+			case oop.DIR_OVER:
+				return cByte;
 			break;
 		}
 	}
@@ -4603,6 +4837,26 @@ public static function strGetExpr():String {
 		return o.toString();
 }
 
+// Get full expression (value) and cast to string;
+// compatible with older non-quoted strings
+public static function regionGetExpr():String {
+	if (peekInt() == oop.SPEC_GLOBALVAR)
+	{
+		thisSE.IP++;
+		var member:String = getString();
+		if (!zzt.globals.hasOwnProperty(member) || forceRegionLiteral)
+		{
+			// Old-style string represents non-quoted region.
+			return member;
+		}
+
+		thisSE.IP -= 2;
+	}
+
+	// Evaluate expression normally.
+	return (strGetExpr());
+}
+
 // Get full expression (value).
 public static function getExpr():Object {
 	// If expression is simple, we read only a single value.
@@ -4796,8 +5050,7 @@ public static function getExprValue(fromOp:int):Object {
 
 		case oop.SPEC_SELF:
 			getInt(); // Dummy argument
-			if (thisSE.myID <= 0)
-				thisSE.myID = ++nextObjPtrNum;
+			assignID(thisSE);
 			return thisSE.myID;
 	}
 
@@ -4960,6 +5213,7 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 	// Fetch current color info
 	var useUnderColor:Boolean = true;
 	var colorToSet:int = SE.getColor(x, y);
+	lastKindColor = colorToSet;
 
 	// If CLONE type used, make a copy of that.
 	if (newKind == -oop.MISC_CLONE)
@@ -4977,6 +5231,30 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 	var eInfo:ElementInfo = typeList[newKind];
 	if (eInfo.NoStat)
 	{
+		if (oldSE && (createFlags & CF_UNDERLAYER) != 0)
+		{
+			// Modify type and color under the status element.
+			if (kwargPos == -1)
+			{
+				if (eInfo.DominantColor)
+					colorToSet = eInfo.COLOR;
+			}
+			else
+			{
+				var kVal:int = getInt();
+				if (eInfo.DominantColor)
+					colorToSet = eInfo.COLOR;
+				else if (kVal == oop.KWARG_COLOR)
+					colorToSet = intGetExpr();
+			}
+
+			lastKindColor = colorToSet;
+			oldSE.UNDERID = newKind;
+			oldSE.UNDERCOLOR = lastKindColor;
+			thisSE.IP = oldIP;
+			return null;
+		}
+
 		// Erase status element.
 		if (oldSE)
 		{
@@ -5023,17 +5301,22 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 		if (kwargPos == -1)
 		{
 			if (eInfo.DominantColor)
-				SE.setColor(x, y, eInfo.COLOR, false);
+				colorToSet = eInfo.COLOR;
 
 			// EMPTY target type forces a virtual default color of black-FG-on-light-grey BG.
 			if (newKind == 0)
-				SE.setColor(x, y, 112, false);
+				colorToSet = 112;
+
+			SE.setColor(x, y, colorToSet, false);
 		}
 		else
 		{
-			var kVal:int = getInt();
+			kVal = getInt();
 			if (eInfo.DominantColor)
-				SE.setColor(x, y, eInfo.COLOR, false);
+			{
+				colorToSet = eInfo.COLOR;
+				SE.setColor(x, y, colorToSet, false);
+			}
 			else if (kVal == oop.KWARG_COLOR)
 			{
 				// Can take one and only one possible kwarg:  color.
@@ -5049,7 +5332,10 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 			{
 				// EMPTY target type forces a virtual default color of black-FG-on-light-grey BG.
 				if (newKind == 0)
-					SE.setColor(x, y, 112, false);
+				{
+					colorToSet = 112;
+					SE.setColor(x, y, colorToSet, false);
+				}
 			}
 		}
 
@@ -5086,6 +5372,7 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 		}
 	}
 
+	lastKindColor = colorToSet;
 	if (!relSE)
 	{
 		// Erase status element if one is already present.
@@ -5141,13 +5428,18 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 			relSE = new SE(newKind, x, y, -1000, true);
 			relSE.FLAGS = FL_GHOST;
 		}
+
 		SE.statElem.push(relSE);
+		lastKindColor = eInfo.COLOR;
 	}
 
 	if (kwargPos == -1)
 	{
 		if (!eInfo.DominantColor && (createFlags & CF_GHOSTED) == 0)
+		{
 			SE.setColor(relSE.X, relSE.Y, colorToSet, useUnderColor);
+		}
+
 		thisSE.IP = oldIP;
 		return relSE; // No kwargs
 	}
@@ -5205,9 +5497,11 @@ public static function createKind(x:int, y:int, newKind:int, createFlags:int=0):
 			break;
 			case oop.KWARG_COLOR:
 				colorToSet = kVal;
+				lastKindColor = colorToSet;
 			break;
 			case oop.KWARG_COLORALL:
 				colorToSet = kVal;
+				lastKindColor = colorToSet;
 				useUnderColor = false;
 			break;
 			case oop.KWARG_DIR:
@@ -6013,6 +6307,40 @@ public static function smartUpdateViewport():void {
 	SE.uCameraY = SE.CameraY;
 }
 
+// Adjust camera
+public static function cameraAdjust(coords:Array):void {
+	var cx:int = int(coords[0]);
+	var cy:int = int(coords[1]);
+	if (zzt.globalProps["LEGACYCAMERA"])
+	{
+		// Legacy edge bumping, as with Super ZZT
+		if (cx - SE.CameraX < 9)
+			SE.CameraX = cx - 9;
+		if (cy - SE.CameraY < 8)
+			SE.CameraY = cy - 8;
+		if (SE.CameraX + SE.vpWidth - cx < 11)
+			SE.CameraX = 11 + cx - SE.vpWidth;
+		if (SE.CameraY + SE.vpHeight - cy < 7)
+			SE.CameraY = 7 + cy - SE.vpHeight;
+
+		SE.CameraX = utils.clipintval(SE.CameraX, 1, SE.gridWidth - SE.vpWidth + 1);
+		SE.CameraY = utils.clipintval(SE.CameraY, 1, SE.gridHeight - SE.vpHeight + 1);
+	}
+	else
+	{
+		// Exact center alignment
+		cx = cx - int(SE.vpWidth >> 1);
+		cy = cy - int(SE.vpHeight >> 1);
+		cx = utils.clipintval(cx, 1, SE.gridWidth - SE.vpWidth + 1);
+		cy = utils.clipintval(cy, 1, SE.gridHeight - SE.vpHeight + 1);
+		SE.CameraX = cx;
+		SE.CameraY = cy;
+	}
+
+	zzt.boardProps["CAMERAX"] = SE.CameraX;
+	zzt.boardProps["CAMERAY"] = SE.CameraY;
+}
+
 public static function cueForEach(varName:String, vType:int, region:String):int {
 	// Cue a "FOR" loop that will iterate through each status element of a region
 	forType = 0;
@@ -6093,8 +6421,7 @@ public static function iterateFor():int {
 			if (relSE)
 			{
 				// Found a status element; set iterator variable to ID.
-				if (relSE.myID <= 0)
-					relSE.myID = ++nextObjPtrNum;
+				assignID(relSE);
 				setVariableFromRef(forVarType1, forVarName1, relSE.myID);
 				break;
 			}
@@ -6458,6 +6785,21 @@ public static function unitMoveAction(se:SE, action:int):Boolean {
 	}
 }
 
+// Marked-up #PLAY string format.
+public static function markupPlayString(str:String):String {
+	if (zzt.globalProps["PLAYREVERB"])
+		str = "K40:0.3:" + str;
+	else
+		str = "K40:0:" + str;
+
+	if (zzt.globalProps["PLAYRETENTION"])
+		str = "Z01@" + str;
+	else
+		str = "Z00P99@" + str;
+
+	return str;
+}
+
 // Callback function for PLAYSYNC if implemented.
 public static function playSyncCallback():Boolean {
 	// Non-active SE can't be synched.
@@ -6543,10 +6885,7 @@ public static function playSyncCallback():Boolean {
 				// Another #PLAY command.  Bump the IP up to this new location;
 				// add to the queue immediately.
 				str = oop.pStrings[playSyncIdleCode[pos++]];
-				if (zzt.globalProps["PLAYRETENTION"])
-					str = "Z01@K40:0.3:" + str;
-				else
-					str = "Z00P99@K40:0:" + str;
+				str = markupPlayString(str);
 
 				Sounds.distributePlayNotes(str);
 				playSyncIdleSE.CYCLE = destCycle;

@@ -53,232 +53,6 @@ public static var pwadExtraLumps:Vector.<Lump> = new Vector.<Lump>();
 public static var pwadExtraLumpBinary:Vector.<ByteArray> = new Vector.<ByteArray>();
 public static var pwadBQUESTHACK:int = 0;
 
-// Property overrides
-public static var overridePropsZZT:Object = null;
-public static var overridePropsSZT:Object = null;
-public static var overridePropsGeneral:Object = null;
-public static var overridePropsGenModern:Object = null;
-public static var overridePropsGenClassic:Object = null;
-
-// Default properties if not set:  ZZT-specific
-public static var defaultPropsZZT:Object = {
-	"GEMHEALTH" : 1,
-	"MAXSTATELEMENTCOUNT" : 151,
-	"CLASSICFLAGLIMIT" : 10,
-	"NOPUTBOTTOMROW" : 1,
-	"BECOMESAMECOLOR" : 0,
-	"LIBERALCOLORCHANGE" : 0,
-	"LEGACYTICK" : 1,
-	"FREESCOLLING" : 0,
-	"SENDALLENTER" : 0
-};
-
-// Default properties if not set:  SZT-specific
-public static var defaultPropsSZT:Object = {
-	"GEMHEALTH" : 10,
-	"MAXSTATELEMENTCOUNT" : 129,
-	"CLASSICFLAGLIMIT" : 16,
-	"NOPUTBOTTOMROW" : 0,
-	"BECOMESAMECOLOR" : 1,
-	"LIBERALCOLORCHANGE" : 1,
-	"LEGACYTICK" : 1,
-	"FREESCOLLING" : 1,
-	"SENDALLENTER" : 1
-};
-
-// Default properties if not set:  WAD-specific
-public static var defaultPropsWAD:Object = {
-	"GEMHEALTH" : 10,
-	"MAXSTATELEMENTCOUNT" : 9999,
-	"CLASSICFLAGLIMIT" : 100000,
-	"NOPUTBOTTOMROW" : 0,
-	"BECOMESAMECOLOR" : 0,
-	"LIBERALCOLORCHANGE" : 0,
-	"LEGACYTICK" : 0,
-	"FREESCOLLING" : 0,
-	"SENDALLENTER" : 0,
-	"KEY0" : 0, "KEY1" : 0, "KEY2" : 0, "KEY3" : 0,
-	"KEY4" : 0, "KEY5" : 0, "KEY6" : 0, "KEY7" : 0,
-	"KEY8" : 0, "KEY9" : 0, "KEY10" : 0, "KEY11" : 0,
-	"KEY12" : 0, "KEY13" : 0, "KEY14" : 0, "KEY15" : 0
-};
-
-// Default properties if not set:  General
-public static var defaultPropsGeneral:Object = {
-	// Gameplay
-	"CONFIGTYPE" : 0,
-	"GAMESPEED" : 4,
-	"FASTESTFPS" : 30,
-	"PLAYERDAMAGE" : 10,
-	"SOUNDOFF" : 0,
-	"IMMEDIATESCROLL" : 0,
-	"ORIGINALSCROLL" : 0,
-	"OVERLAYSCROLL" : 1,
-	"KEYLIMIT" : 1,
-	"KEYSBLOCKPLAYER" : 1,
-	"POINTBLANKFIRING" : 1,
-	"BLINKWALLBUMP" : 0,
-	"TELOBJECT" : 0,
-	"DETECTSCRIPTDEADLOCK" : 1,
-	"PLAYRETENTION" : 1,
-	"PLAYSYNC" : 1,
-	"PLAYERRUNDELAY" : 8,
-	"PLAYERFIREDELAY" : 8,
-	"BLACKKEYGEMS" : 0,
-	"BLACKDOORGEMS" : 0,
-	"ALLCOLORKEYS" : 0,
-	"MOUSEBEHAVIOR" : 3,
-	"OBJECTDIEEMPTY" : 1,
-	"REENTRYMOVESTYPE" : 0,
-	"SCORELIMIT" : 2000000000,
-	"BIT7ATTR" : 1,
-	"SCANLINES" : 2,
-	"BQUESTHACK" : 0,
-	"ZSTONELABEL" : "Stone",
-	"OLDTORCHBAR" : 0,
-	"HIGHSCOREACTIVE" : 1,
-	"HIGHSCOREMIN" : 100,
-	"HIGHSCOREPROMPT" : 1,
-	"MASTERVOLUME" : 50,
-	"PLAYERCHARNORM" : 2,
-	"PLAYERCOLORNORM" : 31,
-	"PLAYERCHARHURT" : 1,
-	"PLAYERCOLORHURT" : 127,
-	"PAUSEANIMATED" : 1,
-	"SITELOADCHOICE" : 3,
-	"WATERSOUND" : 1,
-	"WATERMSG" : 1,
-	"INVISIBLESOUND" : 1,
-	"INVISIBLEMSG" : 1,
-	"FORESTSOUND" : 1,
-	"FORESTMSG" : 1,
-	"DUPSOUNDDIST" : 1000,
-	"FAKEMSG" : 1,
-	"MOUSEEDGENAV" : 1,
-	"MOUSEEDGEPOINTER" : 1,
-	"BOARDEDGETRANS" : 1,
-	"ALLOWINGAMERESTORE" : 1,
-	"ALLOWINGAMECONSOLE" : 1,
-	"ALLOWINGAMECHEAT" : 1,
-	"FASTCHEATFLAG" : 0,
-	"ZZTGAMEGUI" : "ZZTGAME",
-	"SZTGAMEGUI" : "SZTGAME",
-
-	// Version
-	"VERSION" : "1.1",
-
-	// Autosave
-	"AUTOSAVESECS" : 60,
-	"BOARDCHANGESAVESECS" : 20,
-	"REENTRYZAPSAVESECS" : 10,
-	"MAXSAVESTATES" : 30,
-
-	// Deployment
-	"DEP_INDEXPATH" : "",
-	"DEP_RECURSIVELEVEL" : 0,
-	"DEP_INDEXRESOURCE" : "",
-	"DEP_AUTORUNZIP" : 0,
-	"DEP_STARTUPFILE" : "",
-	"DEP_STARTUPGUI" : "DEBUGMENU",
-	"DEP_EXTRAFILTER" : "",
-
-	// -extras?-
-	"PUTREMOVESTILE" : 1
-};
-
-// Altered general properties when option mode switched to "CLASSIC"
-public static var classicPropChanges:Object = {
-	"ORIGINALSCROLL" : 1,
-	"OVERLAYSCROLL" : 0,
-	"PLAYRETENTION" : 0,
-	"BLACKKEYGEMS" : 1,
-	"BLACKDOORGEMS" : 1,
-	"REENTRYMOVESTYPE" : 1,
-	"SCORELIMIT" : 32767,
-	"OLDTORCHBAR" : 1,
-	"BOARDEDGETRANS" : 2,
-	"ALLOWINGAMERESTORE" : 0,
-	"ALLOWINGAMECONSOLE" : 1,
-	"ZZTGAMEGUI" : "CLASSICZZTGAME",
-	"SZTGAMEGUI" : "CLASSICSZTGAME"
-};
-
-// General property subsets
-public static var propSubsets:Object = {
-	"DISPLAY" : ["BIT7ATTR", "SCANLINES", "SZTGAMEGUI", "ZZTGAMEGUI", "OLDTORCHBAR",
-		"PLAYERCHARNORM", "PLAYERCOLORNORM", "PLAYERCHARHURT", "PLAYERCOLORHURT",
-		"PAUSEANIMATED"],
-	"GAMEPLAY" : ["ALLOWINGAMECHEAT", "ALLOWINGAMECONSOLE", "ALLOWINGAMERESTORE",
-		"BLINKWALLBUMP", "FASTCHEATFLAG", "PLAYERDAMAGE", "POINTBLANKFIRING", "SCORELIMIT",
-		"HIGHSCOREACTIVE", "HIGHSCOREMIN", "HIGHSCOREPROMPT"],
-	"KEY" : ["ALLCOLORKEYS", "BLACKDOORGEMS", "BLACKKEYGEMS", "KEYLIMIT", "KEYSBLOCKPLAYER"],
-	"MOVE" : ["BOARDEDGETRANS", "MOUSEBEHAVIOR", "MOUSEEDGENAV", "MOUSEEDGEPOINTER",
-		"PLAYERFIREDELAY", "PLAYERRUNDELAY"],
-	"TIMING" : ["FASTESTFPS", "GAMESPEED"],
-	"SOUND" : ["FAKEMSG", "DUPSOUNDDIST", "INVISIBLEMSG", "INVISIBLESOUND", "PLAYRETENTION",
-		"PLAYSYNC", "SOUNDOFF", "WATERMSG", "WATERSOUND", "FORESTMSG", "FORESTSOUND",
-		"MASTERVOLUME" ],
-	"SCROLL" : ["IMMEDIATESCROLL", "ORIGINALSCROLL", "OVERLAYSCROLL"]
-};
-
-// General property subset title names
-public static var propSubsetNames:Object = {
-	"DISPLAY" : "Display",
-	"GAMEPLAY" : "Gameplay",
-	"KEY" : "Key Usage",
-	"MOVE" : "Movement",
-	"TIMING" : "Timing",
-	"SOUND" : "Sound/Msg",
-	"SCROLL" : "Scrolls"
-};
-
-// Default sound effects
-public static var defaultSoundFx:Object = {
-	"PLAYERMOVE":		"Z00P01:@V40K0:0: T0",
-	"FOREST":			"Z00P02:@V40K0:0: TA",
-	"FORESTSZT0":		"Z00P03:@V40K0:0: T+F",
-	"FORESTSZT1":		"Z00P03:@V40K0:0: T+C",
-	"FORESTSZT2":		"Z00P03:@V40K0:0: T+G",
-	"FORESTSZT3":		"Z00P03:@V40K0:0: T++C",
-	"FORESTSZT4":		"Z00P03:@V40K0:0: T+F#",
-	"FORESTSZT5":		"Z00P03:@V40K0:0: T+C#",
-	"FORESTSZT6":		"Z00P03:@V40K0:0: T+G#",
-	"FORESTSZT7":		"Z00P03:@V40K0:0: T++C#",
-	"COLLECTGEM":		"Z00P04:@V40K0:0: T+C-GEC",
-	"COLLECTAMMO":		"Z00P05:@V40K0:0: TCC#D",
-	"COLLECTTORCH":		"Z00P06:@V40K0:0: TCASE",
-	"PUSHER":			"Z00P08:@V40K0:0: T--F",
-	"BREAKABLEHIT":		"Z00P09:@V40K0:0: -TC",
-	"ALREADYHAVEKEY":	"Z00P10:@V40K0:0: SC-C",
-	"READSCROLL":		"Z00P11:@V40K0:0: TC-C+D-D+E-E+F-F+G-G",
-	"COLLECTKEY":		"Z00P12:@V40K0:0: +TCEGCEGCEGS+C",
-	"OPENDOOR":			"Z00P13:@V40K0:0: TCGBCGBI+C",
-	"DOORLOCKED":		"Z00P14:@V40K0:0: --TGC",
-	"INVISIBLEWALL":	"Z00P15:@V40K0:0: T--DC",
-	"WATERBLOCK":		"Z00P16:@V40K0:0: T+C+C",
-	"DUPLICATE":		"Z00P20:@V40K0:0: SCDEFG",
-	"DUPFAIL":			"Z00P21:@V40K0:0: --TG#F#",
-	"BOMBTICK1":		"Z00P22:@V40K0:0: T8", // low
-	"BOMBTICK2":		"Z00P23:@V40K0:0: T5", // high
-	"BOMBACTIVATE":		"Z00P24:@V40K0:0: TCF+CF+C",
-	"BOMBEXPLODE":		"Z00P25:@V40K0:0: T+++C-C-C-C-C-C",
-	"TORCHOUT":			"Z00P26:@V40K0:0: TC-C-C",
-	"PLAYERSHOOT":		"Z00P31:@V40K0:0: T+C-C-C",
-	"OBJECTSHOOT":		"Z00P32:@V40K0:0: TC-F#",
-	"RICOCHET":			"Z00P33:@V40K0:0: T9",
-	"ENEMYDIE":			"Z00P34:@V40K0:0: TC--C++++C--C",
-	"PLAYERHURT":		"Z00P35:@V40K0:0: T--C+C-C+D#",
-	"TIMELOW":			"Z00P42:@V40K0:0: I.+CFC-F+CFQ.C",
-	"ENERGIZER":		"Z00P43:@V40K0:0: S.-CD#EF+F-FD#C+C-CD#E+F-FD#C+C-CD#E+F-FD#C+C-CD#E+F-FD#C\
-+C-CD#E+F-FD#C+C-CD#E+F-FD#C+C-CD#E+F-FD#C+C-CD#E+F-FD#C",
-	"ENERGIZEREND":		"Z00P44:@V40K0:0: S.-C-A#GF#FD#C", // interrupts ENERGIZER
-	"TRANSPORTER":		"Z00P46:@V40K0:0: TC+D-E+F#-G#+A#C+D",
-	"PASSAGEMOVE":		"Z00P47:@V40K0:0: TCEGC#FG#DF#AD#GA#EG#+C",
-	"OOPERROR":			"Z00P48:@V40K0:0: Q.++C",
-	"DOSERROR":			"Z00P49:@V40K0:0: --S22I1S44I1S00", // guess; not easy to reproduce
-	"GAMEOVER":			"Z00P50:@V40K0:0: S.-CD#G+C-GA#+DGFG#+CF---HC"
-};
-
 public static var sStateDesc:Array = [ "Quick", "Entry", "Zap", "Auto" ];
 
 public static function establishZZTFile(b:ByteArray):Boolean {
@@ -397,7 +171,7 @@ public static function establishZZTFile(b:ByteArray):Boolean {
 	}
 
 	// Successfully loaded file.  Set global properties.
-	setGlobalProperties();
+	setGlobalPropertiesZZT();
 
 	return true;
 }
@@ -474,8 +248,7 @@ public static function establishZZTBoard(boardNum:int):ZZTBoard
 		var num:int = file.readUnsignedByte();
 		var type:int = interp.typeTrans3(num);
 		var color:int = file.readUnsignedByte();
-		/*if (type == 0)
-			color &= 15; // Force EMPTY to have black BG*/
+
 		if (num == 9)
 		{
 			// Switch locations of FG and BG bits for DOOR
@@ -786,6 +559,14 @@ public static function establishZZTBoard(boardNum:int):ZZTBoard
 					{
 						se.FLAGS |= interp.FL_IDLE | interp.FL_LOCKED | interp.FL_NOSTAT;
 						board.statLessCount++;
+
+						// Passages should have color tweaked:  BG->FG slot.
+						if (eInfo.NUMBER == 11)
+						{
+							se.extra["P2"] = sc; // Original color spec
+							sc = ((sc >> 4) & 15) ^ 8;
+							board.colorBuffer[y * baseSizeX + x] = sc;
+						}
 					}
 				}
 			}
@@ -915,30 +696,8 @@ public static function locateSponsorCodeId(findIdx:int, curIdx:int):int {
 	return -1;
 }
 
-public static function setOverridePropDefaults():void {
-	// Extract overrides from defaults
-	var k:String;
-	overridePropsZZT = new Object();
-	for (k in defaultPropsZZT)
-		overridePropsZZT[k] = defaultPropsZZT[k];
-
-	overridePropsSZT = new Object();
-	for (k in defaultPropsSZT)
-		overridePropsSZT[k] = defaultPropsSZT[k];
-
-	overridePropsGenModern = new Object();
-	overridePropsGenClassic = new Object();
-	for (k in defaultPropsGeneral) {
-		overridePropsGenModern[k] = defaultPropsGeneral[k];
-		overridePropsGenClassic[k] = defaultPropsGeneral[k];
-	}
-
-	for (k in classicPropChanges) {
-		overridePropsGenClassic[k] = classicPropChanges[k];
-	}
-}
-
-public static function setGlobalProperties():void {
+// Set global properties from ZZT or SZT file binary fields
+public static function setGlobalPropertiesZZT():void {
 	// -WORLD PROPERTIES-
 	zzt.globalProps["WORLDTYPE"] = worldType;
 	zzt.globalProps["WORLDNAME"] = worldName;
@@ -980,28 +739,28 @@ public static function setGlobalProperties():void {
 	var k:String;
 	if (worldType == -1)
 	{
-		for (k in overridePropsZZT)
-			zzt.globalProps[k] = overridePropsZZT[k];
+		for (k in ZZTProp.overridePropsZZT)
+			zzt.globalProps[k] = ZZTProp.overridePropsZZT[k];
 
 		// Setting SCORE as a config property is considered cheating.
-		if (zzt.CHEATING_DISABLES_PROGRESS && overridePropsZZT.hasOwnProperty("SCORE"))
+		if (zzt.CHEATING_DISABLES_PROGRESS && ZZTProp.overridePropsZZT.hasOwnProperty("SCORE"))
 			zzt.DISABLE_HISCORE = 1;
 	}
 	else if (worldType == -2)
 	{
-		for (k in overridePropsSZT)
-			zzt.globalProps[k] = overridePropsSZT[k];
+		for (k in ZZTProp.overridePropsSZT)
+			zzt.globalProps[k] = ZZTProp.overridePropsSZT[k];
 
 		// Setting SCORE as a config property is considered cheating.
-		if (zzt.CHEATING_DISABLES_PROGRESS && overridePropsSZT.hasOwnProperty("SCORE"))
+		if (zzt.CHEATING_DISABLES_PROGRESS && ZZTProp.overridePropsSZT.hasOwnProperty("SCORE"))
 			zzt.DISABLE_HISCORE = 1;
 	}
 
-	for (k in overridePropsGeneral)
-		zzt.globalProps[k] = overridePropsGeneral[k];
+	for (k in ZZTProp.overridePropsGeneral)
+		zzt.globalProps[k] = ZZTProp.overridePropsGeneral[k];
 
 	// Setting SCORE as a config property is considered cheating.
-	if (zzt.CHEATING_DISABLES_PROGRESS && overridePropsGeneral.hasOwnProperty("SCORE"))
+	if (zzt.CHEATING_DISABLES_PROGRESS && ZZTProp.overridePropsGeneral.hasOwnProperty("SCORE"))
 		zzt.DISABLE_HISCORE = 1;
 
 	// Global variables (from flags)
@@ -1036,8 +795,8 @@ public static function setGlobalProperties():void {
 	// Sound effects set to default for ZZT or SZT
 	if (worldType == -1 || worldType == -2)
 	{
-		for (k in defaultSoundFx)
-			zzt.soundFx[k] = defaultSoundFx[k];
+		for (k in ZZTProp.defaultSoundFx)
+			zzt.soundFx[k] = ZZTProp.defaultSoundFx[k];
 	}
 
 	// Patch using active PWAD (establishPWAD should have been called already)
@@ -1045,6 +804,12 @@ public static function setGlobalProperties():void {
 
 	// Update master volume.
 	Sounds.setMasterVolume(zzt.globalProps["MASTERVOLUME"]);
+
+	// Update scroll interface colors.
+	zzt.setScrollColors(zzt.globalProps["SCRCOLBORDER"],
+		zzt.globalProps["SCRCOLSHADOW"], zzt.globalProps["SCRCOLBG"],
+		zzt.globalProps["SCRCOLTEXT"], zzt.globalProps["SCRCOLCENTERTEXT"],
+		zzt.globalProps["SCRCOLBUTTON"], zzt.globalProps["SCRCOLARROW"]);
 
 	// Reset save state container
 	saveStates = new Vector.<ZZTBoard>();
@@ -1609,8 +1374,7 @@ public static function updateContFromBoard(boardNum:int, newBoard:ZZTBoard):void
 
 	if (newBoard.playerSE)
 	{
-		if (newBoard.playerSE.myID <= 0)
-			newBoard.playerSE.myID = ++interp.nextObjPtrNum;
+		interp.assignID(newBoard.playerSE);
 		zzt.globals["$PLAYER"] = newBoard.playerSE.myID;
 	}
 
@@ -2468,24 +2232,31 @@ public static function establishWADFile(b:ByteArray, isImport:Boolean=false):Boo
 		zzt.globals = parse.jsonDecode(lump.getLumpStr(file));
 
 		// Ensure default properties are present if not defined within WAD.
-		for (var k:String in defaultPropsWAD) {
+		for (var k:String in ZZTProp.defaultPropsWAD) {
 			if (!zzt.globalProps.hasOwnProperty(k))
-				zzt.globalProps[k] = defaultPropsWAD[k];
+				zzt.globalProps[k] = ZZTProp.defaultPropsWAD[k];
 		}
 
-		for (k in overridePropsGeneral) {
+		for (k in ZZTProp.overridePropsGeneral) {
 			if (!zzt.globalProps.hasOwnProperty(k))
-				zzt.globalProps[k] = overridePropsGeneral[k];
+				zzt.globalProps[k] = ZZTProp.overridePropsGeneral[k];
 		}
 
 		// The version number is a forced override.
-		zzt.globalProps["VERSION"] = defaultPropsGeneral["VERSION"];
+		interp.forceRegionLiteral = Boolean(utils.float0(zzt.globalProps["VERSION"]) < 1.2);
+		zzt.globalProps["VERSION"] = ZZTProp.defaultPropsGeneral["VERSION"];
 
 		// Update master volume.
 		Sounds.setMasterVolume(zzt.globalProps["MASTERVOLUME"]);
 
+		// Update scroll interface colors.
+		zzt.setScrollColors(zzt.globalProps["SCRCOLBORDER"],
+			zzt.globalProps["SCRCOLSHADOW"], zzt.globalProps["SCRCOLBG"],
+			zzt.globalProps["SCRCOLTEXT"], zzt.globalProps["SCRCOLCENTERTEXT"],
+			zzt.globalProps["SCRCOLBUTTON"], zzt.globalProps["SCRCOLARROW"]);
+
 		// Setting SCORE as a property is a sneaky way to cheat (it doesn't work).
-		if (zzt.CHEATING_DISABLES_PROGRESS && overridePropsGeneral.hasOwnProperty("SCORE"))
+		if (zzt.CHEATING_DISABLES_PROGRESS && ZZTProp.overridePropsGeneral.hasOwnProperty("SCORE"))
 			zzt.DISABLE_HISCORE = 1;
 	}
 
